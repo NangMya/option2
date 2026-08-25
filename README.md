@@ -17,19 +17,29 @@ A prototype outdoor AR treasure hunt in a single `index.html` (no build step).
 
 ## Running it
 
-**Do not** open the HTML as a local file on a phone — GPS is blocked for `file://`. Use **HTTPS**.
+**Do not** open the HTML as a local file on a phone — GPS/camera need a secure context (`https://` or `localhost`).
 
-- **Phone (real play):** `https://your-domain/…/index.html` — allow Location, walk outdoors.  
-- **Sandbox (seated):** `?debug=1&near=1` — D-pad / WASD + Debug QA panel (no outdoor walk).
+**Recommended (permanent):** host `index.html` on GitHub Pages, Netlify, Vercel, or any static HTTPS host — e.g. `https://nangmya.github.io/optic/`. Push updates there; no tunnel required day to day.
+
+- **Phone (real play):** open your HTTPS site → allow Location → walk outdoors.  
+- **Sandbox (seated):** `?debug=1&near=1` on that same HTTPS URL (or localhost) — D-pad / WASD, no GPS walk.
+
+### Local PC only
+
+```powershell
+python -m http.server 8123
+```
+
+Then open `http://localhost:8123/?debug=1&near=1` on the same machine. Do **not** rely on a Cloudflare tunnel as your normal workflow.
 
 ---
 
 ## Sandbox / debug mode
 
-No real GPS. Move on the radar with **WASD / arrow keys** (PC) or the on-screen **▲◀▼▶** pad. There is **no Debug QA / warp card** — walk to each of the **3** treasures yourself.
+No real GPS. Move on the radar with **WASD / arrow keys** (PC) or the on-screen **▲◀▼▶** pad. Walk to each of the **3** treasures yourself.
 
 ```
-https://your-domain.com/index.html?debug=1&near=1
+https://your-site/index.html?debug=1&near=1
 ```
 
 | Flag | What it does |
@@ -40,22 +50,17 @@ https://your-domain.com/index.html?debug=1&near=1
 
 **Seated test:** PLAY → walk with pad toward the yellow arc → ≤20 m detector + **Open AR Camera** → ≤10 m tap chest → repeat for all **3** → **Take Victory Selfie** → claim.
 
-Radar + detector work from a local file in debug mode. **Camera** still needs HTTPS / localhost on most browsers.
-
 ---
 
 ## Testing on a phone (real GPS)
 
-```powershell
-python -m http.server 8123 --bind 0.0.0.0
-cloudflared tunnel --url http://127.0.0.1:8123 --no-autoupdate
-```
-
-Open the `https://….trycloudflare.com` URL → **PLAY** → allow Location → walk until ≤20 m → Open AR → place zone → open chest → selfie → claim.
+1. Deploy / push to your HTTPS host (GitHub Pages, etc.).  
+2. On the phone, open that `https://…` URL (not `file://`, not a tunnel URL).  
+3. Tap **PLAY** → allow Location → walk until ≤20 m → Open AR → place zone → open chest → selfie → claim.
 
 ### If you see “Location permission denied”
 
-1. URL must be `https://`  
+1. URL must be `https://` (or `localhost` on the same device)  
 2. Browser site settings → Location → Allow  
 3. Phone Location ON for the browser  
 4. Host must not send `Permissions-Policy: geolocation=()`  

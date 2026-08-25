@@ -599,9 +599,17 @@
   }
 
   #ar-target-wrap.locked-on-screen {
-    /* Once geofenced, stay planted in frame (ignore compass pan) */
+    /* Once in AR range, stay planted; size/top set in JS from distance */
     left: 50% !important;
-    top: 62% !important;
+    transition: transform 0.18s ease-out, top 0.18s ease-out, opacity 0.2s;
+  }
+
+  #ar-target {
+    font-size: 120px;
+    line-height: 1;
+    filter: drop-shadow(0 0 40px rgba(251, 191, 36, 0.9));
+    transform-origin: center bottom;
+    transition: filter 0.2s;
   }
 
   #detector-hud {
@@ -2175,15 +2183,33 @@ function resetChestVisual() {
   dom.arTargetWrap.classList.add("hidden-chest");
   dom.arTargetWrap.classList.remove("placed", "opened", "locked-on-screen");
   dom.arTarget.textContent = "📦";
+  dom.arTarget.style.filter = "";
   dom.arTargetWrap.style.pointerEvents = "none";
   dom.arTargetWrap.style.opacity = "";
   dom.arTargetWrap.style.transform = "";
+  dom.arTargetWrap.style.top = "";
   if (dom.arLookHint) dom.arLookHint.classList.add("hidden");
 }
 
 function shouldPlaceChest() {
   if (!state.arUserOpened || state.chestOpened || state.nearest.id === -1) return false;
   return ftToM(state.nearest.distance) <= PLACE_RANGE_M;
+}
+
+/** Perspective scale: larger when close, smaller when far (∝ 1/distance). */
+function arPerspectiveScale(distM) {
+  if (!isFinite(distM) || distM < 0) distM = AR_RANGE_M;
+  const d = Math.max(0.5, Math.min(AR_RANGE_M + 5, distM));
+  // Reference: ~1.25× at 8 m; grows as you approach, shrinks as you leave.
+  const scale = (8 / d) * 1.25;
+  return Math.max(0.32, Math.min(3.8, scale));
+}
+
+/** Slight ground rise as you get closer (depth cue). */
+function arGroundOffsetPct(distM) {
+  const t = 1 - Math.max(0, Math.min(1, distM / AR_RANGE_M));
+  // Far: a bit higher in frame; near: lower toward ground.
+  return 48 + t * 18; // top % for locked chest center
 }
 
 async function updateARView() {
@@ -2227,15 +2253,19 @@ async function updateARView() {
   if (place) state.chestScreenLocked = true;
   else if (distM > PLACE_RANGE_M + 3) state.chestScreenLocked = false;
 
+  const inArRange = distM <= AR_RANGE_M + 2;
   state.chestPlaced = (place || state.chestScreenLocked) && !state.chestOpened;
+
+  const scale = arPerspectiveScale(distM);
+  const groundPct = arGroundOffsetPct(distM);
 
   if (dom.arScanHint) {
     if (state.chestOpened) {
       dom.arScanHint.textContent = "Treasure opened!";
     } else if (state.chestPlaced) {
       dom.arScanHint.textContent = "Treasure locked — tap the chest to open";
-    } else if (distM <= AR_RANGE_M) {
-      dom.arScanHint.textContent = `Get within ${PLACE_RANGE_M} m · now ${distM.toFixed(1)} m`;
+    } else if (inArRange) {
+      dom.arScanHint.textContent = `Walk closer · ${distM.toFixed(1)} m (place ≤ ${PLACE_RANGE_M} m)`;
     } else {
       dom.arScanHint.textContent = "Signal fading — return within 20 m";
     }
@@ -2249,33 +2279,34 @@ async function updateARView() {
     dom.arTarget.textContent = "✨";
     dom.arTargetWrap.style.pointerEvents = "none";
     dom.arTargetWrap.style.opacity = "1";
-    dom.arTargetWrap.style.transform = "translate(-50%, -50%) scale(2.1)";
-  } else if (state.chestPlaced) {
-    // Locked on screen — does NOT vanish when you pan the camera.
+    dom.arTargetWrap.style.top = `${groundPct}%`;
+    dom.arTargetWrap.style.transform = `translate(-50%, -50%) scale(${Math.max(scale, 2.0)})`;
+  } else if (inArRange) {
+    // Always show chest in AR within range; size follows perspective distance.
     if (dom.arLookHint) dom.arLookHint.classList.add("hidden");
-    const scale = Math.min(2.8, 1.35 + Math.max(0, 1 - distM / PLACE_RANGE_M) * 1.2);
     dom.arTargetWrap.classList.remove("hidden-chest");
-    dom.arTargetWrap.classList.add("placed", "locked-on-screen");
+    dom.arTargetWrap.classList.add("locked-on-screen");
+    dom.arTargetWrap.classList.toggle("placed", state.chestPlaced);
     dom.arTargetWrap.classList.remove("opened");
     dom.arTarget.textContent = "📦";
+    dom.arTargetWrap.style.top = `${groundPct}%`;
     dom.arTargetWrap.style.transform = `translate(-50%, -50%) scale(${scale})`;
     dom.arTargetWrap.style.opacity = "1";
-    dom.arTargetWrap.style.pointerEvents = "auto";
-    dom.arTarget.style.cursor = "pointer";
+    // Tap only when in place / locked place zone.
+    const canTap = state.chestPlaced;
+    dom.arTargetWrap.style.pointerEvents = canTap ? "auto" : "none";
+    dom.arTarget.style.cursor = canTap ? "pointer" : "default";
+    dom.arTarget.style.filter = canTap
+      ? ""
+      : "brightness(0.85) saturate(0.9)";
   } else {
-    // Not in place zone yet — show turn hint, not a vanishing box.
     resetChestVisual();
-    if (dom.arLookHint && distM <= AR_RANGE_M) {
+    if (dom.arLookHint) {
       dom.arLookHint.classList.remove("hidden");
       const arrow = dom.arLookHint.querySelector(".arrow");
       const txt = dom.arLookHint.querySelector(".txt");
       if (arrow) arrow.style.transform = `rotate(${relDeg}deg)`;
-      if (txt) {
-        txt.textContent =
-          Math.abs(relDeg) < 25
-            ? `Walk closer · ${distM.toFixed(1)} m`
-            : "Turn toward the signal";
-      }
+      if (txt) txt.textContent = "Return within 20 m";
     }
   }
 
