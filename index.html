@@ -67,29 +67,14 @@
     background: #1e293b;
     border: 1px solid #334155;
     border-radius: 24px;
-    padding: 32px;
+    padding: 28px 28px 24px;
     text-align: center;
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
   }
 
-  .card h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+  .card h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
 
-  .card .tagline { font-size: 12px; color: #94a3b8; margin-bottom: 24px; line-height: 1.6; }
-
-  #username {
-    width: 100%;
-    padding: 16px;
-    border-radius: 12px;
-    background: #334155;
-    border: 2px solid transparent;
-    color: #fff;
-    font-size: 16px;
-    outline: none;
-    margin-bottom: 12px;
-    text-align: center;
-  }
-
-  #username:focus { border-color: var(--gold); }
+  .card .tagline { font-size: 12px; color: #94a3b8; margin-bottom: 22px; line-height: 1.6; }
 
   .btn-primary {
     width: 100%;
@@ -237,20 +222,6 @@
 
   .hud { position: absolute; z-index: 200; }
 
-  #hud-top {
-    top: 32px;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    pointer-events: none;
-    background: rgba(24, 24, 27, 0.9);
-    backdrop-filter: blur(8px);
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    padding: 10px 26px;
-    min-width: 170px;
-  }
-
   #distance { font-size: 30px; font-weight: 900; }
 
   #message { font-size: 11px; font-weight: 700; color: var(--gold); margin-top: 2px; min-height: 14px; }
@@ -280,8 +251,22 @@
 
   .round-btn:active { transform: scale(0.9); }
 
-  #btn-quit { top: 24px; left: 20px; background: rgba(127, 29, 29, 0.4); border-color: rgba(239, 68, 68, 0.5); }
-  #btn-bag { top: 24px; right: 20px; }
+  #btn-bag { top: max(16px, env(safe-area-inset-top)); right: 16px; }
+
+  #hud-top {
+    top: max(16px, env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    pointer-events: none;
+    background: rgba(24, 24, 27, 0.9);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 10px 22px;
+    min-width: 168px;
+    max-width: min(280px, calc(100vw - 96px));
+  }
 
   #bag-count {
     position: absolute;
@@ -469,11 +454,6 @@
   }
 
   .btn-ghost:active, .btn-save:active { transform: scale(0.95); }
-
-  .confirm-actions { display: flex; gap: 12px; margin-top: 8px; }
-  .confirm-actions button { flex: 1; padding: 14px; border-radius: 12px; font-weight: 700; }
-  .confirm-no { background: var(--panel-2); }
-  .confirm-yes { background: var(--red); }
 
   /* ---------- Effects canvas ---------- */
 
@@ -694,7 +674,7 @@
 
   #detector-strip {
     position: absolute;
-    top: max(148px, calc(env(safe-area-inset-top) + 128px));
+    top: max(132px, calc(env(safe-area-inset-top) + 112px));
     left: 50%;
     transform: translateX(-50%);
     z-index: 200;
@@ -715,7 +695,7 @@
 
   #bg-status {
     position: absolute;
-    top: max(148px, calc(env(safe-area-inset-top) + 132px));
+    top: max(152px, calc(env(safe-area-inset-top) + 134px));
     left: 50%;
     transform: translateX(-50%);
     z-index: 210;
@@ -1030,10 +1010,7 @@
     <h1>Treasure Radar 📡</h1>
     <p id="tagline" class="tagline"></p>
 
-    <button id="btn-play" class="btn-primary">PLAY 1</button>
-    <button id="btn-test-sound" type="button" class="btn-ghost" style="width:100%;margin-top:10px;background:#334155">
-      🔊 TEST SOUND
-    </button>
+    <button id="btn-play" class="btn-primary">PLAY 2</button>
 
     <p id="best-score" class="best-score hidden"></p>
 
@@ -1059,8 +1036,6 @@
       <div id="target-arc"></div>
     </div>
   </div>
-
-  <button id="btn-quit" class="hud round-btn">🛑</button>
 
   <button id="btn-bag" class="hud round-btn">
     🎁<span id="bag-count" class="hidden">0</span>
@@ -1142,16 +1117,6 @@
       <button id="btn-bag-close">✕</button>
     </div>
     <div id="bag-grid"></div>
-  </div>
-</div>
-
-<div id="overlay-quit" class="overlay hidden">
-  <div class="panel" style="text-align:center">
-    <h3 style="font-size:17px;font-weight:700;margin-bottom:22px">Abandon the hunt?</h3>
-    <div class="confirm-actions">
-      <button id="btn-quit-no" class="confirm-no">No</button>
-      <button id="btn-quit-yes" class="confirm-yes">Yes</button>
-    </div>
   </div>
 </div>
 
@@ -1372,7 +1337,6 @@ const dom = {
   countdownText: el("countdown-text"),
   countdownSub: el("countdown-sub"),
   overlayBag: el("overlay-bag"),
-  overlayQuit: el("overlay-quit"),
   overlayResult: el("overlay-result"),
   overlaySelfie: el("overlay-selfie"),
   overlayClaim: el("overlay-claim"),
@@ -2038,7 +2002,7 @@ function stopProximityDetector() {
 }
 
 function playDetectorBeep(intensity) {
-  // Used by TEST SOUND / immediate feedback — schedules on audio clock.
+  // Immediate detector feedback — schedules on audio clock.
   scheduleBeepNow(intensity);
   if (navigator.vibrate) {
     try { navigator.vibrate(Math.round(20 + intensity * 40)); } catch { /* ignore */ }
@@ -2711,7 +2675,7 @@ function updateBackgroundStatus() {
       `Background hunt · ${gps.hiddenUpdates} GPS fixes · audio ${detector.unlocked ? "ON" : "OFF"}`;
     dom.bgStatus.style.color = detector.unlocked ? "#4ade80" : "#f87171";
   } else if (!detector.unlocked) {
-    dom.bgStatus.textContent = "Tap TEST SOUND / PLAY if beeps are missing";
+    dom.bgStatus.textContent = "Tap PLAY again if beeps are missing";
     dom.bgStatus.style.color = "#fbbf24";
   } else {
     state.bgPaused = false;
@@ -3444,34 +3408,11 @@ function saveResultImage() {
    ========================================================================= */
 
 el("btn-play").addEventListener("click", play);
-el("btn-test-sound").addEventListener("click", async () => {
-  const ok = await unlockDetectorAudio(true);
-  if (ok) {
-    setTimeout(() => playDetectorBeep(0.4), 220);
-    setTimeout(() => playDetectorBeep(0.8), 450);
-    flash("Sound OK — turn media volume up if quiet");
-  } else {
-    alert(
-      "Could not play sound.\n\n" +
-        "1. Unmute the phone (media volume, not just ringer)\n" +
-        "2. Turn off Silent / Do Not Disturb\n" +
-        "3. Tap TEST SOUND again\n" +
-        "4. Open the page over https:// (not a saved file)"
-    );
-  }
-});
 
 el("btn-bag").addEventListener("click", openBag);
 el("btn-bag-close").addEventListener("click", () => dom.overlayBag.classList.add("hidden"));
 dom.overlayBag.addEventListener("click", (e) => {
   if (e.target === dom.overlayBag) dom.overlayBag.classList.add("hidden");
-});
-
-el("btn-quit").addEventListener("click", () => dom.overlayQuit.classList.remove("hidden"));
-el("btn-quit-no").addEventListener("click", () => dom.overlayQuit.classList.add("hidden"));
-el("btn-quit-yes").addEventListener("click", () => {
-  dom.overlayQuit.classList.add("hidden");
-  finish(true);
 });
 
 el("btn-again").addEventListener("click", () => location.reload());
