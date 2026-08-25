@@ -546,26 +546,62 @@
   }
 
   #ar-flash-lights.active .flash-beam {
-    animation: flash-strobe 0.35s ease-in-out infinite alternate;
+    animation: flash-strobe 0.45s ease-in-out infinite alternate;
   }
 
+  /* Soft corner glows only — no solid “card” rectangles */
   .flash-beam {
     position: absolute;
-    width: 28%;
-    height: 28%;
-    border-radius: 18px;
+    width: 42%;
+    height: 32%;
+    border-radius: 50%;
     opacity: 0;
-    box-shadow: 0 0 60px 20px currentColor;
+    background: transparent !important;
+    box-shadow: 0 0 70px 28px currentColor;
+    filter: blur(2px);
   }
 
-  .flash-beam.tl { top: 4%; left: 4%; color: #fbbf24; background: rgba(251,191,36,0.35); }
-  .flash-beam.tr { top: 4%; right: 4%; color: #ef4444; background: rgba(239,68,68,0.35); }
-  .flash-beam.bl { bottom: 18%; left: 4%; color: #ef4444; background: rgba(239,68,68,0.35); }
-  .flash-beam.br { bottom: 18%; right: 4%; color: #fbbf24; background: rgba(251,191,36,0.35); }
+  .flash-beam.tl { top: -6%; left: -6%; color: rgba(251,191,36,0.55); }
+  .flash-beam.tr { top: -6%; right: -6%; color: rgba(239,68,68,0.45); }
+  .flash-beam.bl { bottom: 8%; left: -6%; color: rgba(239,68,68,0.4); }
+  .flash-beam.br { bottom: 8%; right: -6%; color: rgba(251,191,36,0.5); }
 
   @keyframes flash-strobe {
-    0%   { opacity: 0.15; transform: scale(0.92); }
-    100% { opacity: 1; transform: scale(1.08); }
+    0%   { opacity: 0.2; }
+    100% { opacity: 0.75; }
+  }
+
+  #ar-look-hint {
+    position: absolute;
+    left: 50%;
+    top: 42%;
+    transform: translate(-50%, -50%);
+    z-index: 4;
+    text-align: center;
+    pointer-events: none;
+    color: #fef3c7;
+    text-shadow: 0 2px 16px rgba(0,0,0,0.85);
+  }
+
+  #ar-look-hint.hidden { display: none !important; }
+
+  #ar-look-hint .arrow {
+    font-size: 42px;
+    line-height: 1;
+    margin-bottom: 8px;
+    transition: transform 0.15s ease-out;
+  }
+
+  #ar-look-hint .txt {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  #ar-target-wrap.locked-on-screen {
+    /* Once geofenced, stay planted in frame (ignore compass pan) */
+    left: 50% !important;
+    top: 62% !important;
   }
 
   #detector-hud {
@@ -627,22 +663,23 @@
 
   #detector-strip {
     position: absolute;
-    top: max(72px, calc(env(safe-area-inset-top) + 56px));
+    top: max(148px, calc(env(safe-area-inset-top) + 128px));
     left: 50%;
     transform: translateX(-50%);
     z-index: 200;
-    width: min(280px, 90vw);
-    padding: 10px 14px;
-    border-radius: 14px;
-    background: rgba(24,24,27,0.88);
+    width: min(200px, 70vw);
+    padding: 6px 12px 8px;
+    border-radius: 10px;
+    background: rgba(24,24,27,0.75);
     border: 1px solid var(--line);
     pointer-events: none;
   }
 
   #detector-strip.hidden-strip { opacity: 0; pointer-events: none; }
 
-  #strip-distance { font-size: 18px; font-weight: 800; text-align: center; }
-  #strip-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.1); margin-top: 6px; overflow: hidden; }
+  /* Distance lives in #hud-top — strip is signal bar only */
+  #strip-distance { display: none; }
+  #strip-bar { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.1); overflow: hidden; }
   #strip-fill { height: 100%; width: 0%; background: var(--gold); transition: width 0.12s; }
 
   #bg-status {
@@ -770,7 +807,43 @@
     object-fit: cover;
   }
 
+  #selfie-video {
+    transform: scaleX(-1);
+  }
+
   #selfie-preview.hidden { display: none !important; }
+
+  /* AR treasure composited over the real selfie person */
+  #selfie-ar-box {
+    position: absolute;
+    left: 50%;
+    bottom: 18%;
+    transform: translateX(-50%);
+    z-index: 3;
+    font-size: clamp(72px, 22vw, 110px);
+    line-height: 1;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.55)) drop-shadow(0 0 28px rgba(251,191,36,0.65));
+    pointer-events: none;
+    animation: chest-idle 2.2s ease-in-out infinite;
+  }
+
+  #selfie-ar-box.hidden { display: none !important; }
+
+  #selfie-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 4;
+    padding: 10px 12px 14px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #fde68a;
+    pointer-events: none;
+  }
 
   #selfie-countdown {
     position: absolute;
@@ -783,6 +856,7 @@
     color: #fff;
     text-shadow: 0 4px 24px rgba(0,0,0,0.7);
     pointer-events: none;
+    z-index: 5;
   }
 
   #selfie-actions, #claim-actions {
@@ -990,6 +1064,10 @@
     <div class="flash-beam br"></div>
   </div>
   <p id="ar-scan-hint">Scan the ground — walk to exact spot</p>
+  <div id="ar-look-hint" class="hidden">
+    <div class="arrow">➤</div>
+    <div class="txt">Turn toward the signal</div>
+  </div>
   <div id="ar-target-wrap" class="hidden-chest">
     <div id="ar-glow"></div>
     <div id="ar-target">📦</div>
@@ -1033,9 +1111,11 @@
 
 <div id="overlay-selfie" class="overlay hidden">
   <div style="display:flex;flex-direction:column;align-items:center">
-    <p class="label" style="margin-bottom:10px;color:#fbbf24">Victory Selfie</p>
+    <p class="label" style="margin-bottom:10px;color:#fbbf24">Victory Selfie · you + treasure</p>
     <div id="selfie-stage">
       <video id="selfie-video" playsinline autoplay muted></video>
+      <div id="selfie-ar-box" aria-hidden="true">📦</div>
+      <div id="selfie-caption">TREASURE IN FRAME · REAL YOU</div>
       <img id="selfie-preview" class="hidden" alt="Selfie preview" />
       <div id="selfie-countdown" class="hidden"></div>
     </div>
@@ -1176,6 +1256,7 @@ const state = {
   gpsAccuracyFt: null,
   arUserOpened: false,   // tapped Open AR Camera
   chestPlaced: false,
+  chestScreenLocked: false, // once in place zone, pin chest on screen
   chestOpened: false,
   selfieDataUrl: null,
   bgPaused: false,
@@ -1265,6 +1346,7 @@ const dom = {
   arTarget: el("ar-target"),
   arFlash: el("ar-flash-lights"),
   arScanHint: el("ar-scan-hint"),
+  arLookHint: el("ar-look-hint"),
   detectorDistance: el("detector-distance"),
   detectorFill: el("detector-fill"),
   detectorSignal: el("detector-signal"),
@@ -1274,6 +1356,7 @@ const dom = {
   selfieVideo: el("selfie-video"),
   selfiePreview: el("selfie-preview"),
   selfieCountdown: el("selfie-countdown"),
+  selfieArBox: el("selfie-ar-box"),
   btnSelfieCapture: el("btn-selfie-capture"),
   btnSelfieRetake: el("btn-selfie-retake"),
   btnSelfieUse: el("btn-selfie-use"),
@@ -2076,6 +2159,7 @@ function closeARToRadar() {
   if (state.inventory.length >= BOX_COUNT && state.chestOpened) return;
   state.arUserOpened = false;
   state.chestPlaced = false;
+  state.chestScreenLocked = false;
   ar.active = false;
   dom.arLayer.classList.add("hidden");
   dom.screenGame.classList.remove("ar-active");
@@ -2089,9 +2173,12 @@ function closeARToRadar() {
 function resetChestVisual() {
   if (!dom.arTargetWrap) return;
   dom.arTargetWrap.classList.add("hidden-chest");
-  dom.arTargetWrap.classList.remove("placed", "opened");
+  dom.arTargetWrap.classList.remove("placed", "opened", "locked-on-screen");
   dom.arTarget.textContent = "📦";
   dom.arTargetWrap.style.pointerEvents = "none";
+  dom.arTargetWrap.style.opacity = "";
+  dom.arTargetWrap.style.transform = "";
+  if (dom.arLookHint) dom.arLookHint.classList.add("hidden");
 }
 
 function shouldPlaceChest() {
@@ -2130,70 +2217,81 @@ async function updateARView() {
 
   if (!ar.videoReady && !ar.stream) await ensureARCamera();
 
-  const distFt = state.nearest.distance;
-  const distM = state.nearest.id === -1 ? Infinity : ftToM(distFt);
+  const distM = state.nearest.id === -1 ? Infinity : ftToM(state.nearest.distance);
   const bearingToTarget = state.nearest.angle * (Math.PI / 180);
   const rel = ((bearingToTarget - state.heading + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
   const relDeg = rel * (180 / Math.PI);
 
   const place = shouldPlaceChest();
-  state.chestPlaced = place && !state.chestOpened;
+  // Hysteresis: stay locked until you walk farther than place+3 m
+  if (place) state.chestScreenLocked = true;
+  else if (distM > PLACE_RANGE_M + 3) state.chestScreenLocked = false;
+
+  state.chestPlaced = (place || state.chestScreenLocked) && !state.chestOpened;
 
   if (dom.arScanHint) {
     if (state.chestOpened) {
       dom.arScanHint.textContent = "Treasure opened!";
-    } else if (place) {
+    } else if (state.chestPlaced) {
       dom.arScanHint.textContent = "Treasure locked — tap the chest to open";
     } else if (distM <= AR_RANGE_M) {
-      dom.arScanHint.textContent = `Scan the ground — ${distM.toFixed(1)} m to place zone`;
+      dom.arScanHint.textContent = `Get within ${PLACE_RANGE_M} m · now ${distM.toFixed(1)} m`;
     } else {
       dom.arScanHint.textContent = "Signal fading — return within 20 m";
     }
   }
 
   if (state.chestOpened) {
+    if (dom.arLookHint) dom.arLookHint.classList.add("hidden");
     dom.arTargetWrap.classList.remove("hidden-chest");
-    dom.arTargetWrap.classList.add("opened");
+    dom.arTargetWrap.classList.add("opened", "locked-on-screen");
     dom.arTargetWrap.classList.remove("placed");
     dom.arTarget.textContent = "✨";
     dom.arTargetWrap.style.pointerEvents = "none";
     dom.arTargetWrap.style.opacity = "1";
-    dom.arTargetWrap.style.transform = "translate(-50%, -40%) scale(2.2)";
-  } else if (place) {
-    const maxOffset = innerWidth * 0.38;
-    const xOff = (relDeg / 55) * maxOffset;
-    const clampedX = Math.max(-maxOffset, Math.min(maxOffset, xOff));
-    // Ground-biased placement (lower in frame as you approach).
-    const groundY = 70 + Math.min(90, (1 - distM / PLACE_RANGE_M) * 80);
-    const scale = Math.min(3.2, 1.1 + (1 - distM / PLACE_RANGE_M) * 1.8);
-
+    dom.arTargetWrap.style.transform = "translate(-50%, -50%) scale(2.1)";
+  } else if (state.chestPlaced) {
+    // Locked on screen — does NOT vanish when you pan the camera.
+    if (dom.arLookHint) dom.arLookHint.classList.add("hidden");
+    const scale = Math.min(2.8, 1.35 + Math.max(0, 1 - distM / PLACE_RANGE_M) * 1.2);
     dom.arTargetWrap.classList.remove("hidden-chest");
-    dom.arTargetWrap.classList.add("placed");
+    dom.arTargetWrap.classList.add("placed", "locked-on-screen");
     dom.arTargetWrap.classList.remove("opened");
     dom.arTarget.textContent = "📦";
-    dom.arTargetWrap.style.transform =
-      `translate(calc(-50% + ${clampedX}px), calc(-50% + ${groundY}px)) scale(${scale})`;
-    dom.arTargetWrap.style.opacity = Math.abs(relDeg) > 85 ? "0.35" : "1";
+    dom.arTargetWrap.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    dom.arTargetWrap.style.opacity = "1";
     dom.arTargetWrap.style.pointerEvents = "auto";
     dom.arTarget.style.cursor = "pointer";
   } else {
+    // Not in place zone yet — show turn hint, not a vanishing box.
     resetChestVisual();
+    if (dom.arLookHint && distM <= AR_RANGE_M) {
+      dom.arLookHint.classList.remove("hidden");
+      const arrow = dom.arLookHint.querySelector(".arrow");
+      const txt = dom.arLookHint.querySelector(".txt");
+      if (arrow) arrow.style.transform = `rotate(${relDeg}deg)`;
+      if (txt) {
+        txt.textContent =
+          Math.abs(relDeg) < 25
+            ? `Walk closer · ${distM.toFixed(1)} m`
+            : "Turn toward the signal";
+      }
+    }
   }
 
   const flashOn = distM <= FLASH_RANGE_M;
-  dom.arFlash.classList.toggle("active", flashOn);
+  if (dom.arFlash) dom.arFlash.classList.toggle("active", flashOn);
   updateDebugPanel();
 }
 
 function openTreasureChest() {
   if (!state.arUserOpened || state.inventory.length >= BOX_COUNT) return;
-  if (!shouldPlaceChest() && !DEBUG_MOVE) {
+  const canOpen = shouldPlaceChest() || state.chestScreenLocked || state.chestPlaced;
+  if (!canOpen && !DEBUG_MOVE) {
     flash("Move closer to place the chest.");
     return;
   }
-  if (!state.chestPlaced && !shouldPlaceChest()) {
-    state.chestPlaced = true;
-  }
+  if (!state.chestPlaced) state.chestPlaced = true;
 
   const box = state.boxes.find((b) => b.id === state.nearest.id && !b.collected)
     || state.boxes.find((b) => !b.collected);
@@ -2207,7 +2305,6 @@ function openTreasureChest() {
 
   const left = BOX_COUNT - state.inventory.length;
   if (left <= 0) {
-    // Victory selfie only after ALL boxes are opened.
     state.chestOpened = true;
     setPhase("chest_open");
     flash(`All ${BOX_COUNT} treasures opened!`);
@@ -2217,9 +2314,9 @@ function openTreasureChest() {
     }
   } else {
     flash(`Opened ${state.inventory.length}/${BOX_COUNT} — find the next`);
-    // Back to map hunt for the next box — no selfie yet.
     state.arUserOpened = false;
     state.chestPlaced = false;
+    state.chestScreenLocked = false;
     state.chestOpened = false;
     ar.active = false;
     dom.arLayer.classList.add("hidden");
@@ -2275,6 +2372,7 @@ async function startVictorySelfie() {
   dom.overlaySelfie.classList.remove("hidden");
 
   dom.selfiePreview.classList.add("hidden");
+  if (dom.selfieArBox) dom.selfieArBox.classList.remove("hidden");
   dom.btnSelfieCapture.classList.remove("hidden");
   dom.btnSelfieRetake.classList.add("hidden");
   dom.btnSelfieUse.classList.add("hidden");
@@ -2282,15 +2380,40 @@ async function startVictorySelfie() {
 
   const ok = await ensureSelfieCamera();
   if (!ok) {
-    // Placeholder frame for desktop debug without camera.
     state.selfieDataUrl = makeDebugSelfiePlaceholder();
     dom.selfiePreview.src = state.selfieDataUrl;
     dom.selfiePreview.classList.remove("hidden");
+    if (dom.selfieArBox) dom.selfieArBox.classList.add("hidden");
     dom.btnSelfieCapture.classList.add("hidden");
     dom.btnSelfieRetake.classList.add("hidden");
     dom.btnSelfieUse.classList.remove("hidden");
     flash("Debug selfie placeholder (no front camera)");
   }
+}
+
+/** Draw AR treasure box onto selfie canvas (person = camera, box = overlay). */
+function drawTreasureOnSelfieCanvas(ctx, w, h) {
+  const boxSize = Math.round(Math.min(w, h) * 0.28);
+  const x = w / 2;
+  const y = h * 0.72;
+  ctx.save();
+  ctx.font = `${boxSize}px system-ui, "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.shadowColor = "rgba(251,191,36,0.85)";
+  ctx.shadowBlur = 28;
+  ctx.fillText("📦", x, y);
+  ctx.restore();
+
+  ctx.save();
+  ctx.fillStyle = "rgba(0,0,0,0.5)";
+  ctx.fillRect(0, h - Math.round(h * 0.11), w, Math.round(h * 0.11));
+  ctx.fillStyle = "#fbbf24";
+  ctx.font = `bold ${Math.round(w * 0.055)}px system-ui, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("I FOUND THE TREASURE", w / 2, h - Math.round(h * 0.055));
+  ctx.restore();
 }
 
 function makeDebugSelfiePlaceholder() {
@@ -2303,15 +2426,11 @@ function makeDebugSelfiePlaceholder() {
   g.addColorStop(1, "#0f172a");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 720, 960);
-  ctx.fillStyle = "#fbbf24";
-  ctx.font = "bold 48px system-ui, sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("VICTORY", 360, 420);
-  ctx.fillStyle = "#fff";
+  ctx.fillStyle = "#94a3b8";
   ctx.font = "28px system-ui, sans-serif";
-  ctx.fillText("Debug selfie", 360, 480);
-  ctx.font = "80px system-ui, sans-serif";
-  ctx.fillText("📦", 360, 580);
+  ctx.textAlign = "center";
+  ctx.fillText("You (selfie)", 360, 380);
+  drawTreasureOnSelfieCanvas(ctx, 720, 960);
   return c.toDataURL("image/jpeg", 0.92);
 }
 
@@ -2333,18 +2452,13 @@ async function captureSelfie() {
     c.width = video.videoWidth;
     c.height = video.videoHeight;
     const ctx = c.getContext("2d");
-    // Mirror selfie for natural preview.
+    // Mirror person for natural selfie.
     ctx.translate(c.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0);
-    // Banner
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.fillStyle = "rgba(0,0,0,0.45)";
-    ctx.fillRect(0, c.height - 90, c.width, 90);
-    ctx.fillStyle = "#fbbf24";
-    ctx.font = `bold ${Math.round(c.width * 0.06)}px system-ui, sans-serif`;
-    ctx.textAlign = "center";
-    ctx.fillText("I FOUND THE TREASURE", c.width / 2, c.height - 36);
+    // AR box stays unmirrored on top of the person.
+    drawTreasureOnSelfieCanvas(ctx, c.width, c.height);
     state.selfieDataUrl = c.toDataURL("image/jpeg", 0.92);
   } else {
     state.selfieDataUrl = makeDebugSelfiePlaceholder();
@@ -2352,6 +2466,7 @@ async function captureSelfie() {
 
   dom.selfiePreview.src = state.selfieDataUrl;
   dom.selfiePreview.classList.remove("hidden");
+  if (dom.selfieArBox) dom.selfieArBox.classList.add("hidden");
   dom.btnSelfieRetake.classList.remove("hidden");
   dom.btnSelfieUse.classList.remove("hidden");
   selfie.capturing = false;
@@ -2361,6 +2476,7 @@ async function captureSelfie() {
 function retakeSelfie() {
   state.selfieDataUrl = null;
   dom.selfiePreview.classList.add("hidden");
+  if (dom.selfieArBox) dom.selfieArBox.classList.remove("hidden");
   dom.btnSelfieRetake.classList.add("hidden");
   dom.btnSelfieUse.classList.add("hidden");
   dom.btnSelfieCapture.classList.remove("hidden");
@@ -2826,6 +2942,7 @@ function resetRun() {
   state.phase = "hunt";
   state.arUserOpened = false;
   state.chestPlaced = false;
+  state.chestScreenLocked = false;
   state.chestOpened = false;
   state.selfieDataUrl = null;
   state.username = "";

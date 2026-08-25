@@ -7,8 +7,8 @@ A prototype outdoor AR treasure hunt in a single `index.html` (no build step).
 1. Real-time distance on radar + metal-detector audio (nearest of **3** treasures)  
 2. At **≤ 20 m** — higher-pitched detector + **Open AR Camera** CTA  
 3. User opens AR, scans surroundings  
-4. At **≤ 10 m** (place geofence) — animated treasure chest appears on the ground plane  
-5. Tap chest to open → repeat until all **3** are opened → **Take Victory Selfie**  
+4. At **≤ 10 m** — treasure locks **on screen** (stays visible while you pan) — tap to open  
+5. After all **3** opened → **Victory Selfie**: real you (front camera) + AR treasure box in frame  
 6. Form: **Name** + **Phone** → **Share to Claim**
 
 **Movement is GPS-only** in real play. Shake does nothing. Compass only sets facing.
