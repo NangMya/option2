@@ -347,8 +347,9 @@
   #screen-game.out-of-bounds #minimap { border-color: var(--red); }
 
   .dot { position: absolute; border-radius: 50%; transform: translate(-50%, -50%); }
-  .dot-box { width: 4px; height: 4px; background: rgba(255, 255, 255, 0.4); }
-  .dot-box.nearest { width: 8px; height: 8px; background: var(--gold); box-shadow: 0 0 5px var(--gold); }
+  .dot-box { width: 5px; height: 5px; background: rgba(251, 191, 36, 0.55); box-shadow: 0 0 4px rgba(251, 191, 36, 0.35); }
+  .dot-box.nearest { width: 9px; height: 9px; background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+  .dot-box.hidden { display: none; }
   .dot-player { width: 9px; height: 9px; background: var(--blue); border: 1px solid #fff; }
   #screen-game.out-of-bounds .dot-player { background: var(--red); }
 
@@ -1010,13 +1011,13 @@
     <h1>Treasure Radar 📡</h1>
     <p id="tagline" class="tagline"></p>
 
-    <button id="btn-play" class="btn-primary">PLAY 2</button>
+    <button id="btn-play" class="btn-primary">PLAY 3</button>
 
     <p id="best-score" class="best-score hidden"></p>
 
     <div class="hint">
-      <b>Hunt:</b> walk with GPS → metal detector ≤20&nbsp;m → <b>Open AR Camera</b> → open all <b>3</b> chests → victory selfie → claim.<br />
-      <b>Sandbox:</b> <code>?debug=1&amp;near=1</code> — WASD / arrows / D-pad on the map (no GPS).
+      <b>Hunt:</b> radar + minimap + detector guide you — crates stay <b>hidden</b> until <b>Open AR Camera</b>. Open all <b>3</b> → selfie → claim.<br />
+      <b>Sandbox:</b> <code>?debug=1&amp;near=1</code> — WASD / arrows / D-pad (no GPS).
     </div>
     <div id="secure-warn" class="warn-box hidden"></div>
   </div>
@@ -1486,32 +1487,18 @@ function buildWorld() {
   dom.grid.style.height = `${span}px`;
   dom.grid.style.backgroundSize = `${GRID_FT * PIXEL_SCALE}px ${GRID_FT * PIXEL_SCALE}px`;
 
+  // Crates are hidden on the radar world — discover only via AR camera.
+  // Minimap still shows approximate locations.
   dom.boxes.innerHTML = "";
   for (const box of state.boxes) {
-    const node = document.createElement("div");
-    node.className = "box";
-    node.textContent = "📦";
-    node.style.left = `${(box.x - ROOM_SIZE_FT / 2) * PIXEL_SCALE}px`;
-    node.style.top = `${(box.y - ROOM_SIZE_FT / 2) * PIXEL_SCALE}px`;
-    node.addEventListener("click", (e) => {
-      e.stopPropagation();
-      // Radar tap no longer auto-collects — guide into AR flow.
-      const distM = ftToM(distanceTo(box));
-      if (distM <= AR_RANGE_M) {
-        flash('Signal hot — tap "Open AR Camera"');
-        updateHotZoneCta();
-      } else {
-        flash("Too far — follow the radar.");
-      }
-    });
-    box.node = node;
-    dom.boxes.appendChild(node);
+    box.node = null;
   }
 
   dom.minimap.innerHTML = "";
   for (const box of state.boxes) {
     const dot = document.createElement("div");
     dot.className = "dot dot-box";
+    dot.title = "Hidden treasure (find with AR)";
     dot.style.left = `${(box.x / ROOM_SIZE_FT) * 100}%`;
     dot.style.top = `${(box.y / ROOM_SIZE_FT) * 100}%`;
     box.dot = dot;
@@ -1601,11 +1588,10 @@ function render() {
     state.nearest.id === -1 ? "---" : formatDistanceM(state.nearest.distance);
 
   for (const box of state.boxes) {
-    box.node.classList.toggle("hidden", box.collected);
-    box.node.classList.toggle("nearest", box.id === state.nearest.id);
-    box.node.classList.toggle("in-range", !box.collected && distanceTo(box) <= PICKUP_RANGE);
-    box.dot.classList.toggle("hidden", box.collected);
-    box.dot.classList.toggle("nearest", box.id === state.nearest.id);
+    if (box.dot) {
+      box.dot.classList.toggle("hidden", box.collected);
+      box.dot.classList.toggle("nearest", box.id === state.nearest.id);
+    }
   }
 
   dom.playerDot.style.left = `${(state.pos.x / ROOM_SIZE_FT) * 100}%`;
@@ -3460,8 +3446,8 @@ window.addEventListener("resize", resizeFx);
 const maxSpawnRadius = Math.max(MIN_RADIUS + 1, ROOM_SIZE_FT / 2 - 5);
 const spaceNeeded = Math.ceil((maxSpawnRadius * 2) / 10) * 10;
 el("tagline").innerHTML =
-  `${BOX_COUNT} treasures are hidden nearby — live distance + metal detector.<br />` +
-  `≤20&nbsp;m → Open AR → tap chest (×${BOX_COUNT}) → victory selfie → claim.<br />` +
+  `${BOX_COUNT} hidden treasures — radar distance + minimap only.<br />` +
+  `≤20&nbsp;m → <b>Open AR Camera</b> to reveal &amp; open each chest → selfie → claim.<br />` +
   `<span style="color:#64748b">Needs roughly ${spaceNeeded} ft of open outdoor space.</span>`;
 
 if (DEBUG_MOVE) {
