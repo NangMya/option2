@@ -26,7 +26,7 @@ A prototype outdoor AR treasure hunt in a single `index.html` (no build step).
 
 ## Sandbox / debug mode
 
-No real GPS. You move on the radar map with **WASD / arrow keys** (PC) or the on-screen **▲◀▼▶** pad. The yellow **Warp to map** card teleports you to a set distance from the treasure.
+No real GPS. Move on the radar with **WASD / arrow keys** (PC) or the on-screen **▲◀▼▶** pad. There is **no Debug QA / warp card** — walk to each of the **3** treasures yourself.
 
 ```
 https://your-domain.com/index.html?debug=1&near=1
@@ -34,22 +34,11 @@ https://your-domain.com/index.html?debug=1&near=1
 
 | Flag | What it does |
 | --- | --- |
-| `?debug=1` | No GPS — keyboard / D-pad movement + **Warp to map** card |
-| `&near=1` | Treasure spawns **~8–18 m** away |
-| `&at=15` | Spawn treasure exactly **N meters** ahead |
+| `?debug=1` | No GPS — keyboard / D-pad movement |
+| `&near=1` | Treasures spawn **~8–18 m** away |
+| `&at=15` | Spawn treasures around **N meters** ahead |
 
-### Warp to map card
-
-| Button | Teleports you on the radar to… |
-| --- | --- |
-| **Far · 40 m** | ~40 m from treasure (cold / quiet detector) |
-| **Hot · 20 m** | ~20 m — metal detector + **Open AR Camera** |
-| **Place · 10 m** | ~10 m — chest can place in AR |
-| **Near · 5 m** | ~5 m — close place / flash zone |
-
-Then keep walking with WASD / pad, or open AR when the CTA appears.
-
-**Seated test:** PLAY → Warp **Hot · 20 m** → hear detector → **Open AR Camera** → Warp **Place · 10 m** → tap chest → selfie → claim.
+**Seated test:** PLAY → walk with pad toward the yellow arc → ≤20 m detector + **Open AR Camera** → ≤10 m tap chest → repeat for all **3** → **Take Victory Selfie** → claim.
 
 Radar + detector work from a local file in debug mode. **Camera** still needs HTTPS / localhost on most browsers.
 

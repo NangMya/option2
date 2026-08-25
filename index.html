@@ -919,7 +919,7 @@
 
     <div class="hint">
       <b>Hunt:</b> walk with GPS → metal detector ≤20&nbsp;m → <b>Open AR Camera</b> → open all <b>3</b> chests → victory selfie → claim.<br />
-      <b>Sandbox:</b> <code>?debug=1&amp;near=1</code> — WASD / arrows move on map (no GPS). Yellow card = <b>Warp to map</b>.
+      <b>Sandbox:</b> <code>?debug=1&amp;near=1</code> — WASD / arrows / D-pad on the map (no GPS).
     </div>
     <div id="secure-warn" class="warn-box hidden"></div>
   </div>
@@ -2007,11 +2007,8 @@ function updateHotZoneCta() {
 }
 
 function updateDebugPanel() {
-  if (!dom.debugPanel || !DEBUG_MOVE) return;
-  dom.debugPanel.classList.remove("hidden");
-  const dist =
-    state.nearest.id === -1 ? "—" : `${ftToM(state.nearest.distance).toFixed(1)} m`;
-  dom.debugPhase.textContent = `dist ${dist} · WASD / ▲◀▼▶`;
+  // Debug QA / Warp card stays hidden — movement is WASD / D-pad only.
+  if (dom.debugPanel) dom.debugPanel.classList.add("hidden");
 }
 
 /* =========================================================================
@@ -2210,16 +2207,17 @@ function openTreasureChest() {
 
   const left = BOX_COUNT - state.inventory.length;
   if (left <= 0) {
+    // Victory selfie only after ALL boxes are opened.
     state.chestOpened = true;
     setPhase("chest_open");
-    flash("All 3 treasures opened!");
+    flash(`All ${BOX_COUNT} treasures opened!`);
     updateARView();
     if (dom.btnVictorySelfie) {
       dom.btnVictorySelfie.classList.remove("hidden");
     }
   } else {
-    flash(`Opened ${state.inventory.length}/${BOX_COUNT} — ${left} left on the radar`);
-    // Back to map hunt for the next box.
+    flash(`Opened ${state.inventory.length}/${BOX_COUNT} — find the next`);
+    // Back to map hunt for the next box — no selfie yet.
     state.arUserOpened = false;
     state.chestPlaced = false;
     state.chestOpened = false;
@@ -2267,8 +2265,9 @@ function stopSelfieCamera() {
 }
 
 async function startVictorySelfie() {
-  if (state.inventory.length < BOX_COUNT) {
-    flash(`Open all ${BOX_COUNT} treasures first.`);
+  if (state.inventory.length !== BOX_COUNT) {
+    flash(`Open all ${BOX_COUNT} treasures first (${state.inventory.length}/${BOX_COUNT}).`);
+    if (dom.btnVictorySelfie) dom.btnVictorySelfie.classList.add("hidden");
     return;
   }
   setPhase("selfie");
@@ -2804,10 +2803,7 @@ async function play() {
   dom.screenStart.classList.add("hidden");
   dom.screenGame.classList.remove("hidden");
   dom.controls.classList.toggle("hidden", !DEBUG_MOVE);
-  if (DEBUG_MOVE) {
-    dom.debugPanel.classList.remove("hidden");
-    updateDebugPanel();
-  }
+  if (dom.debugPanel) dom.debugPanel.classList.add("hidden");
 
   attachCompass();
   acquireWakeLock();
@@ -3342,14 +3338,8 @@ dom.btnSelfieRetake.addEventListener("click", retakeSelfie);
 dom.btnSelfieUse.addEventListener("click", useSelfieAndClaim);
 dom.btnClaimShare.addEventListener("click", shareToClaim);
 
-if (DEBUG_MOVE) {
-  el("dbg-warp-40").addEventListener("click", () => debugWarpPlayerToDistance(40));
-  el("dbg-warp-20").addEventListener("click", () => debugWarpPlayerToDistance(20));
-  el("dbg-warp-10").addEventListener("click", () => debugWarpPlayerToDistance(10));
-  el("dbg-warp-5").addEventListener("click", () => debugWarpPlayerToDistance(5));
-  dom.debugPanel.classList.remove("hidden");
-  updateDebugPanel();
-}
+// Debug mode: WASD / D-pad only — Warp / Debug QA card stays hidden.
+if (dom.debugPanel) dom.debugPanel.classList.add("hidden");
 
 window.addEventListener("keydown", onKeyDown);
 window.addEventListener("resize", resizeFx);
@@ -3363,7 +3353,7 @@ el("tagline").innerHTML =
 
 if (DEBUG_MOVE) {
   el("tagline").innerHTML +=
-    `<br /><span style="color:#fbbf24">Sandbox: no GPS — WASD / arrows or D-pad to walk on the map. Yellow card warps your map distance.` +
+    `<br /><span style="color:#fbbf24">Sandbox: no GPS — walk with WASD / arrows or D-pad.` +
     `${DEBUG_NEAR ? " near=1 (~8–18 m spawn)." : ""}` +
     `${Number.isFinite(DEBUG_AT_M) ? ` at=${DEBUG_AT_M}m.` : ""}</span>`;
 }
