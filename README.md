@@ -1,25 +1,30 @@
 # Treasure Radar
 
-A prototype web game. Five crates are scattered around you in a virtual field; a radar
-shows the distance and bearing to the closest one. Walk to a crate and tap it to collect it.
+A prototype outdoor AR treasure hunt in a single `index.html` (no build step).
 
-**Movement is GPS-only.** Shaking or waving the phone does nothing — you must physically
-change location outdoors. The compass only sets facing; it never advances your position.
+**Live flow**
 
-Everything lives in a single `index.html`. There is no build step, no server, and no
-dependencies.
+1. Real-time distance on radar + metal-detector audio  
+2. At **≤ 20 m** — higher-pitched detector + **Open AR Camera** CTA  
+3. User opens AR, scans surroundings  
+4. At **≤ 10 m** (place geofence) — animated treasure chest appears on the ground plane  
+5. Tap chest to open → **Take Victory Selfie**  
+6. Form: **Name** + **Phone** → **Share to Claim**
+
+**Movement is GPS-only** in real play. Shake does nothing. Compass only sets facing.
+
+---
 
 ## Running it
 
-**Do not** double-click or share the HTML file on a phone — GPS is blocked for local files
-(`file://`, `content://`). Upload to a server and open over **HTTPS**.
+**Do not** open the HTML as a local file on a phone — GPS is blocked for `file://`. Use **HTTPS**.
 
-- **Phone (real play):** `https://your-domain/…/index.html` — allow Location, walk outdoors.
-- **Sandbox (seated, no walking):** `?debug=1&near=1` — virtual movement via D-pad/keys (see below).
+- **Phone (real play):** `https://your-domain/…/index.html` — allow Location, walk outdoors.  
+- **Sandbox (seated):** `?debug=1&near=1` — D-pad / WASD + Debug QA panel (no outdoor walk).
 
-## Sandbox testing (sit in one place)
+---
 
-Add **`?debug=1`** to skip GPS and move with the keyboard or on-screen D-pad:
+## Sandbox / debug mode
 
 ```
 https://your-domain.com/index.html?debug=1&near=1
@@ -27,126 +32,106 @@ https://your-domain.com/index.html?debug=1&near=1
 
 | Flag | What it does |
 | --- | --- |
-| `?debug=1` | No GPS — **WASD** / **arrow keys** (PC) or **▲◀▼▶ pad** (phone) |
-| `&near=1` | Crates spawn only **8–18 m** away (few taps to reach AR) |
+| `?debug=1` | No GPS — **WASD** / arrows (PC) or on-screen **▲◀▼▶** pad; shows **Debug QA** panel |
+| `&near=1` | Treasure spawns **~8–18 m** away (quick hot-zone reach) |
+| `&at=15` | Spawn treasure exactly **N meters** ahead (e.g. `at=5` for place zone) |
+| `&skip=ar` | After GO!, jump toward AR (also: `open`, `selfie`, `claim`) |
 
-**Seated test flow:** PLAY → turn with **◀ ▶** toward the yellow arc → tap **▲** to step forward → hear detector beeps → under 20 m AR opens → under 8 m flash lights → tap crate to collect.
+### Debug QA panel (yellow, bottom-right)
 
-Radar + detector work from a local file in debug mode; **AR camera** still needs **HTTPS** or localhost on most phones.
+| Button | Action |
+| --- | --- |
+| **Warp · 15 m** | Put treasure ~15 m ahead (hot zone / Open AR) |
+| **Warp · 5 m** | Put treasure ~5 m ahead (place geofence) |
+| **Open AR** | Same as the in-game CTA |
+| **Force place chest** | Open AR + warp to place zone |
+| **Open chest** | Trigger open animation + Victory Selfie CTA |
+| **→ Selfie** | Jump to victory selfie stage |
+| **→ Claim** | Jump to Name / Phone / Share to Claim |
 
-## Testing on a phone
+### Seated full-flow QA (recommended)
 
-Geolocation and compass need a **secure context** (HTTPS or `localhost`). A LAN address
-like `http://192.168.x.x:8123` will load the page but GPS/compass stay blocked. Use a tunnel:
+1. Open `index.html?debug=1&near=1` (HTTPS or localhost for camera).  
+2. Tap **PLAY** → countdown → detector may already beep if spawn is ≤20 m.  
+3. Tap **Open AR Camera** (or Debug → Open AR).  
+4. **Warp · 5 m** (or walk with ▲) until chest appears → tap chest.  
+5. **Take Victory Selfie** → Capture / Use → fill Name + Phone → **Share to Claim**.
+
+**Fastest smoke test:** `?debug=1&near=1&skip=claim` jumps to the claim form after GO!
+
+Radar + detector work from a local file in debug mode. **Camera** still needs HTTPS / localhost on most browsers; debug continues with placeholders if camera is denied.
+
+---
+
+## Testing on a phone (real GPS)
 
 ```powershell
-# 1. serve the folder
 python -m http.server 8123 --bind 0.0.0.0
-
-# 2. in a second terminal, expose it over HTTPS
 cloudflared tunnel --url http://127.0.0.1:8123 --no-autoupdate
 ```
 
-Open the printed `https://….trycloudflare.com` URL on the phone.
-
-On the phone: open the **https://** URL (not http), tap **PLAY**, allow **Location**,
-stand still until the HUD shows `GPS · locked`, then walk toward the target.
+Open the `https://….trycloudflare.com` URL → **PLAY** → allow Location → walk until ≤20 m → Open AR → place zone → open chest → selfie → claim.
 
 ### If you see “Location permission denied”
 
-1. Confirm the address starts with `https://` (plain `http://` is blocked by browsers).
-2. Site / browser settings → Location → **Allow** for your domain, then reload.
-3. Phone Settings → Location must be ON for the browser app.
-4. Some hosts/CDNs send `Permissions-Policy: geolocation=()` which blocks GPS — remove that
-   header or allow geolocation for your site.
-5. For desktop layout testing only, use `?debug=1` (no GPS required).
+1. URL must be `https://`  
+2. Browser site settings → Location → Allow  
+3. Phone Location ON for the browser  
+4. Host must not send `Permissions-Policy: geolocation=()`  
+5. Layout-only: `?debug=1` (no GPS)
 
-## Metal detector + AR discovery
+---
 
-While hunting, the game behaves like a **gold/metal detector**:
+## Zones
 
-- **Distance** — target range shown continuously in **meters** (HUD + detector strip).
-- **Audio alarm** — beeps faster and higher-pitched as you get closer (Web Audio).
-- **AR view** — within **~20 m**, the rear camera opens and a large crate appears aligned to compass bearing; tap it when green/in range to collect.
-- **Flash alert** — within **~8 m**, corner strobe lights pulse with the alarm.
+| Zone | Distance | Behavior |
+| --- | --- | --- |
+| Cold | > 20 m | Distance HUD; detector quiet |
+| Hot | ≤ 20 m | Faster / higher beeps + **Open AR Camera** |
+| Place | ≤ 10 m (while AR open) | Chest placed in camera view |
+| Flash | ≤ 8 m | Corner strobes + vibrate (when screen on) |
 
-Tap **← RADAR** in AR to return to the map view (AR re-opens when you enter 20 m again).
+AR does **not** auto-open; the player must tap **Open AR Camera**. **← RADAR** exits AR (chest re-places when you open AR again in range).
 
 ### Background / screen off
 
-The hunt uses a **background audio persistence** stack so proximity beeps can continue
-after the screen locks:
+Detector keep-alive: Web Audio + HTML5 loop + Media Session + optional Wake Lock. Beeps schedule on the AudioContext clock. GPS may still update while media plays (device-dependent).
 
-1. **Web Audio** continuous low pulse (keeps the audio thread alive)
-2. **HTML5 looping audio** + **Media Session** (helps iOS/Android keep the page warm)
-3. Beeps are **scheduled on the AudioContext clock** (not `setInterval`), so they keep
-   firing even when the main JS thread is throttled
-4. **GPS `watchPosition`** still updates distance on many phones while media is playing
-5. Screen **Wake Lock** when the OS allows it
-
-**Zones:** distance always shown · alarm beeps **only at ≤ 20 m** (faster as you close in) · rapid alarm + vibrate under **~8 m** when screen is on
-
-**Limits:** Some phones still pause web pages after long lock periods. Vibration is often
-blocked while locked (OS policy). Keep media volume up; do not force-stop the browser.
+---
 
 ## Controls
 
 | Input | Action |
 | --- | --- |
-| Walking outdoors (GPS) | Real-world displacement moves you 1:1 on the radar |
-| Compass | Sets facing — auto-on at hunt start; toggle anytime |
-| GPS track (compass off) | Facing is inferred from your walk direction |
-| Tap a crate | Collect it once it glows green (within pickup range) |
-| `?debug=1` + WASD / pad | Desktop-only movement for layout testing |
+| Walking (GPS) | Moves you on the radar 1:1 |
+| Compass | Facing only |
+| **Open AR Camera** | Manual AR entry at ≤20 m |
+| Tap AR chest | Open treasure (in place zone) |
+| Victory Selfie / Claim | End loop |
+| `?debug=1` pad / WASD | Seated movement |
 
-The on-screen D-pad is **hidden** unless `?debug=1` is set, so it cannot be used to cheat
-on a phone.
+D-pad is **hidden** unless `?debug=1` (anti-cheat).
+
+---
 
 ## Anti-cheat notes
 
-- Accelerometer / shake detection was removed entirely.
-- Position updates only come from `navigator.geolocation.watchPosition`.
-- Fixes worse than ±50 ft accuracy are ignored.
-- Tiny GPS hops under 3 ft are ignored (standing still / jitter).
-- Your starting GPS fix becomes the field center; crates are virtual offsets from there.
+- No accelerometer movement  
+- Real play: position only from `watchPosition`  
+- Accuracy worse than ±50 ft ignored; hops under 3 ft ignored  
+- Start GPS fix = field center; treasure is a virtual offset (debug can warp it)
 
-Phone GPS is typically ±15–40 ft outdoors. Pickup range is set wide for that reason.
-Indoors GPS is usually unusable — this game expects open sky.
-
-## How much space do you need?
-
-Scale is **1 real foot = 1 virtual foot**. Switch presets with:
-
-```js
-const PRESET = PRESETS.outdoor;   // or PRESETS.compact
-```
-
-| | `outdoor` (default) | `compact` |
-| --- | --- | --- |
-| Field size | 160 ft | 80 ft |
-| Crates spawn | 25–75 ft out | 15–35 ft out |
-| Pickup range | 25 ft | 20 ft |
-| Open space needed | **~150 ft across** | **~70 ft across** |
-
-## Tuning
-
-```js
-const PRESETS = {
-  outdoor: { roomSize: 160, pixelScale: 14, pickupRange: 25, minRadius: 25 },
-  compact: { roomSize: 80, pixelScale: 24, pickupRange: 20, minRadius: 15 },
-};
-
-const GPS_MAX_ACCURACY_FT = 50;  // reject weak fixes
-const GPS_MIN_MOVE_FT = 3;       // ignore jitter under this
-```
+---
 
 ## Saved data
 
-Scores are kept in `localStorage` under the `treasure_radar_save` key — username, best clear
-time, cumulative points, and run count. Clearing site data resets everything.
+`localStorage`:
+
+- `treasure_radar_save` — best time, points, runs  
+- `treasure_radar_save_claim` — last Name / Phone claim payload  
+
+---
 
 ## Notes
 
-This started life as a Next.js app with Prisma/MySQL and an accelerometer pedometer. Both
-were removed: there is no backend, and movement is GPS-based so shake-cheating does not work.
-The current build is a single `index.html` (emoji and CSS only).
+Earlier Next.js + Prisma + pedometer version was removed. This file is the full prototype.

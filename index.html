@@ -667,6 +667,239 @@
   #screen-game.ar-active #btn-compass { opacity: 0; pointer-events: none; }
 
   #screen-game.ar-active #hud-top { opacity: 0.35; }
+
+  /* ---------- Hot-zone CTA ---------- */
+
+  #btn-open-ar {
+    position: absolute;
+    left: 50%;
+    bottom: max(120px, calc(env(safe-area-inset-bottom) + 100px));
+    transform: translateX(-50%);
+    z-index: 220;
+    width: min(320px, calc(100vw - 32px));
+    padding: 16px 20px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #fbbf24, #f59e0b);
+    color: #000;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    box-shadow: 0 12px 40px rgba(251, 191, 36, 0.35);
+    animation: cta-pulse 1.4s ease-in-out infinite;
+  }
+
+  #btn-open-ar.hidden { display: none !important; }
+
+  @keyframes cta-pulse {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.03); }
+  }
+
+  /* ---------- AR chest states ---------- */
+
+  #ar-target-wrap.placed #ar-target {
+    animation: chest-idle 2.2s ease-in-out infinite;
+  }
+
+  #ar-target-wrap.opened #ar-target {
+    animation: none;
+    filter: drop-shadow(0 0 50px rgba(34, 197, 94, 0.95));
+  }
+
+  #ar-target-wrap.hidden-chest { opacity: 0; pointer-events: none !important; }
+
+  @keyframes chest-idle {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-10px) scale(1.04); }
+  }
+
+  #ar-scan-hint {
+    position: absolute;
+    top: max(64px, calc(env(safe-area-inset-top) + 52px));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 7;
+    width: min(320px, 90vw);
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #fef3c7;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.8);
+    pointer-events: none;
+  }
+
+  #btn-victory-selfie {
+    position: absolute;
+    left: 50%;
+    bottom: max(140px, calc(env(safe-area-inset-bottom) + 120px));
+    transform: translateX(-50%);
+    z-index: 8;
+    width: min(300px, calc(100vw - 40px));
+    padding: 16px 18px;
+    border-radius: 14px;
+    background: #22c55e;
+    color: #052e16;
+    font-weight: 800;
+    font-size: 15px;
+  }
+
+  #btn-victory-selfie.hidden { display: none !important; }
+
+  /* ---------- Selfie / Claim overlays ---------- */
+
+  #overlay-selfie, #overlay-claim {
+    z-index: 560;
+  }
+
+  #selfie-stage {
+    position: relative;
+    width: min(360px, 92vw);
+    aspect-ratio: 3 / 4;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #0f172a;
+    border: 1px solid #334155;
+  }
+
+  #selfie-video, #selfie-preview {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  #selfie-preview.hidden { display: none !important; }
+
+  #selfie-countdown {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 96px;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 4px 24px rgba(0,0,0,0.7);
+    pointer-events: none;
+  }
+
+  #selfie-actions, #claim-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    width: min(360px, 92vw);
+  }
+
+  #selfie-actions button, #claim-actions button { flex: 1; }
+
+  .claim-card {
+    width: min(380px, 94vw);
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 20px;
+    padding: 24px;
+  }
+
+  .claim-card h2 {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+
+  .claim-card .sub {
+    font-size: 12px;
+    color: #94a3b8;
+    text-align: center;
+    margin-bottom: 18px;
+    line-height: 1.5;
+  }
+
+  .claim-card label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin: 0 0 6px;
+  }
+
+  .claim-card input {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    background: #334155;
+    border: 2px solid transparent;
+    color: #fff;
+    font-size: 16px;
+    outline: none;
+    margin-bottom: 12px;
+  }
+
+  .claim-card input:focus { border-color: var(--gold); }
+
+  #claim-thumb {
+    width: 88px;
+    height: 88px;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+    margin: 0 auto 16px;
+    border: 1px solid #475569;
+  }
+
+  /* ---------- Debug panel ---------- */
+
+  #debug-panel {
+    position: fixed;
+    right: 8px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    z-index: 800;
+    width: min(168px, 42vw);
+    padding: 8px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid #fbbf24;
+    font-size: 10px;
+    line-height: 1.3;
+  }
+
+  #debug-panel.hidden { display: none !important; }
+
+  #debug-panel .dbg-title {
+    color: #fbbf24;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  #debug-panel .dbg-phase {
+    color: #94a3b8;
+    margin-bottom: 8px;
+    word-break: break-word;
+  }
+
+  #debug-panel .dbg-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  #debug-panel button {
+    width: 100%;
+    padding: 7px 8px;
+    border-radius: 8px;
+    background: #334155;
+    font-size: 10px;
+    font-weight: 700;
+    text-align: left;
+  }
+
+  #debug-panel button:active { background: #475569; }
 </style>
 </head>
 <body>
@@ -677,7 +910,6 @@
     <h1>Treasure Radar 📡</h1>
     <p id="tagline" class="tagline"></p>
 
-    <input id="username" type="text" placeholder="Enter your name…" maxlength="16" autocomplete="off" />
     <button id="btn-play" class="btn-primary">PLAY</button>
     <button id="btn-test-sound" type="button" class="btn-ghost" style="width:100%;margin-top:10px;background:#334155">
       🔊 TEST SOUND
@@ -686,8 +918,8 @@
     <p id="best-score" class="best-score hidden"></p>
 
     <div class="hint">
-      <b>On a phone:</b> open over <b>HTTPS</b>, tap PLAY (unlocks audio + GPS), then walk. A quiet pulse keeps hunting alive with the screen locked.<br />
-      <b>Sandbox:</b> <code>?debug=1&amp;near=1</code> — D-pad / WASD, no GPS walk needed.
+      <b>Hunt:</b> walk with GPS → metal detector ≤20&nbsp;m → <b>Open AR Camera</b> → tap chest → victory selfie → claim.<br />
+      <b>Sandbox:</b> <code>?debug=1&amp;near=1</code> — D-pad / WASD + debug panel (no outdoor walk).
     </div>
     <div id="secure-warn" class="warn-box hidden"></div>
   </div>
@@ -743,9 +975,11 @@
     <button id="ctrl-back" title="Step back">▼</button>
     <button id="ctrl-right" title="Turn right">▶</button>
   </div>
+
+  <button id="btn-open-ar" type="button" class="hidden">📷 Open AR Camera</button>
 </div>
 
-<!-- AR discovery view (auto within ~20 m) -->
+<!-- AR discovery view (manual — Open AR Camera when ≤20 m) -->
 <div id="ar-layer" class="hidden">
   <video id="ar-video" playsinline autoplay muted></video>
   <div id="ar-radar-fade"></div>
@@ -755,11 +989,13 @@
     <div class="flash-beam bl"></div>
     <div class="flash-beam br"></div>
   </div>
-  <div id="ar-target-wrap">
+  <p id="ar-scan-hint">Scan the ground — walk to exact spot</p>
+  <div id="ar-target-wrap" class="hidden-chest">
     <div id="ar-glow"></div>
     <div id="ar-target">📦</div>
   </div>
   <button id="btn-ar-back" type="button">← RADAR</button>
+  <button id="btn-victory-selfie" type="button" class="hidden">📸 Take Victory Selfie</button>
   <div id="detector-hud">
     <div id="detector-distance" class="mono">--- m</div>
     <div id="detector-bar"><div id="detector-fill"></div></div>
@@ -795,6 +1031,37 @@
   </div>
 </div>
 
+<div id="overlay-selfie" class="overlay hidden">
+  <div style="display:flex;flex-direction:column;align-items:center">
+    <p class="label" style="margin-bottom:10px;color:#fbbf24">Victory Selfie</p>
+    <div id="selfie-stage">
+      <video id="selfie-video" playsinline autoplay muted></video>
+      <img id="selfie-preview" class="hidden" alt="Selfie preview" />
+      <div id="selfie-countdown" class="hidden"></div>
+    </div>
+    <div id="selfie-actions">
+      <button id="btn-selfie-capture" class="btn-save">CAPTURE</button>
+      <button id="btn-selfie-retake" class="btn-ghost hidden">RETAKE</button>
+      <button id="btn-selfie-use" class="btn-primary hidden" style="width:auto;padding:14px">USE PHOTO</button>
+    </div>
+  </div>
+</div>
+
+<div id="overlay-claim" class="overlay hidden">
+  <div class="claim-card">
+    <h2>Share to Claim</h2>
+    <p class="sub">Enter your details to claim your treasure win.</p>
+    <img id="claim-thumb" class="hidden" alt="" />
+    <label for="claim-name">Name</label>
+    <input id="claim-name" type="text" placeholder="Your name" maxlength="40" autocomplete="name" />
+    <label for="claim-phone">Phone Number</label>
+    <input id="claim-phone" type="tel" placeholder="Phone number" maxlength="20" autocomplete="tel" />
+    <div id="claim-actions">
+      <button id="btn-claim-share" class="btn-primary" style="width:100%">Share to Claim</button>
+    </div>
+  </div>
+</div>
+
 <div id="overlay-result" class="overlay hidden">
   <div id="result-card">
     <div id="result-title">MISSION COMPLETE</div>
@@ -810,6 +1077,21 @@
   <div class="result-actions">
     <button id="btn-again" class="btn-ghost">PLAY AGAIN</button>
     <button id="btn-save" class="btn-save">SAVE IMAGE 📸</button>
+  </div>
+</div>
+
+<!-- Debug QA panel (?debug=1) -->
+<div id="debug-panel" class="hidden">
+  <div class="dbg-title">Debug QA</div>
+  <div id="debug-phase" class="dbg-phase">phase: —</div>
+  <div class="dbg-btns">
+    <button type="button" id="dbg-warp-15" title="Place treasure ~15 m ahead">Warp · 15 m</button>
+    <button type="button" id="dbg-warp-5" title="Place treasure ~5 m ahead (place zone)">Warp · 5 m</button>
+    <button type="button" id="dbg-open-ar">Open AR</button>
+    <button type="button" id="dbg-force-place">Force place chest</button>
+    <button type="button" id="dbg-open-chest">Open chest</button>
+    <button type="button" id="dbg-selfie">→ Selfie</button>
+    <button type="button" id="dbg-claim">→ Claim</button>
   </div>
 </div>
 
@@ -840,7 +1122,7 @@ const ROOM_SIZE_FT = PRESET.roomSize;
 const PIXEL_SCALE  = PRESET.pixelScale;
 const PICKUP_RANGE = PRESET.pickupRange;
 const MIN_RADIUS   = PRESET.minRadius;
-const BOX_COUNT    = 5;
+const BOX_COUNT    = 1; // single treasure hunt
 const TURN_STEP    = 15;
 
 const GRID_FT = Math.max(1, Math.round(100 / PIXEL_SCALE));
@@ -853,18 +1135,24 @@ const GPS_FIX_TIMEOUT_MS = 20000;
 
 // Metal detector + AR ranges (real-world meters)
 const M_PER_FT = 1 / FT_PER_M;
-const AR_RANGE_M = 20;
+const AR_RANGE_M = 20;            // hot zone + Open AR CTA
 const AR_RANGE_FT = AR_RANGE_M * FT_PER_M;
 const FLASH_RANGE_M = 8;
 const FLASH_RANGE_FT = FLASH_RANGE_M * FT_PER_M;
+const PLACE_RANGE_M = 10;         // geofence: place 3D chest on ground
+const PLACE_RANGE_FT = PLACE_RANGE_M * FT_PER_M;
 const DETECTOR_MAX_FT = ROOM_SIZE_FT / 2;
 
-const DEBUG_MOVE = new URLSearchParams(location.search).has("debug");
+const urlParams = new URLSearchParams(location.search);
+const DEBUG_MOVE = urlParams.has("debug");
 // ?debug=1&near=1 — spawn crates ~8–18 m away for quick AR/detector testing while seated
 const DEBUG_NEAR =
   DEBUG_MOVE &&
-  (new URLSearchParams(location.search).has("near") ||
-    new URLSearchParams(location.search).get("debug") === "near");
+  (urlParams.has("near") || urlParams.get("debug") === "near");
+// Optional: ?at=5 | ?at=15 — spawn treasure at exact meters ahead (debug)
+const DEBUG_AT_M = DEBUG_MOVE ? Number(urlParams.get("at")) : NaN;
+// Optional: ?skip=ar|open|selfie|claim — jump after GO!
+const DEBUG_SKIP = DEBUG_MOVE ? (urlParams.get("skip") || "").toLowerCase() : "";
 const STORAGE_KEY = "treasure_radar_save";
 
 /* =========================================================================
@@ -873,8 +1161,11 @@ const STORAGE_KEY = "treasure_radar_save";
 
 const state = {
   username: "",
+  phone: "",
   playing: false,
   finished: false,
+  // hunt | hot | ar_scan | chest_open | selfie | claim | done
+  phase: "hunt",
   pos: { x: ROOM_SIZE_FT / 2, y: ROOM_SIZE_FT / 2 },
   heading: 0,
   boxes: [],
@@ -888,7 +1179,10 @@ const state = {
   compassEnabled: false,
   gpsReady: false,
   gpsAccuracyFt: null,
-  arManualRadar: false, // user chose radar view while still in AR range
+  arUserOpened: false,   // tapped Open AR Camera
+  chestPlaced: false,
+  chestOpened: false,
+  selfieDataUrl: null,
   bgPaused: false,
 };
 
@@ -921,6 +1215,11 @@ const ar = {
   videoReady: false,
 };
 
+const selfie = {
+  stream: null,
+  capturing: false,
+};
+
 let wakeLock = null;
 let keepAliveAudio = null;
 
@@ -929,7 +1228,6 @@ const el = (id) => document.getElementById(id);
 const dom = {
   screenStart: el("screen-start"),
   screenGame: el("screen-game"),
-  username: el("username"),
   bestScore: el("best-score"),
   camera: el("camera"),
   grid: el("grid"),
@@ -954,6 +1252,8 @@ const dom = {
   overlayBag: el("overlay-bag"),
   overlayQuit: el("overlay-quit"),
   overlayResult: el("overlay-result"),
+  overlaySelfie: el("overlay-selfie"),
+  overlayClaim: el("overlay-claim"),
   resultTitle: el("result-title"),
   resultName: el("result-name"),
   resultBoxes: el("result-boxes"),
@@ -969,10 +1269,25 @@ const dom = {
   arTargetWrap: el("ar-target-wrap"),
   arTarget: el("ar-target"),
   arFlash: el("ar-flash-lights"),
+  arScanHint: el("ar-scan-hint"),
   detectorDistance: el("detector-distance"),
   detectorFill: el("detector-fill"),
   detectorSignal: el("detector-signal"),
   btnArBack: el("btn-ar-back"),
+  btnOpenAr: el("btn-open-ar"),
+  btnVictorySelfie: el("btn-victory-selfie"),
+  selfieVideo: el("selfie-video"),
+  selfiePreview: el("selfie-preview"),
+  selfieCountdown: el("selfie-countdown"),
+  btnSelfieCapture: el("btn-selfie-capture"),
+  btnSelfieRetake: el("btn-selfie-retake"),
+  btnSelfieUse: el("btn-selfie-use"),
+  claimName: el("claim-name"),
+  claimPhone: el("claim-phone"),
+  claimThumb: el("claim-thumb"),
+  btnClaimShare: el("btn-claim-share"),
+  debugPanel: el("debug-panel"),
+  debugPhase: el("debug-phase"),
 };
 
 /* =========================================================================
@@ -1009,7 +1324,7 @@ function recordRun() {
 
 function showBestScore() {
   const save = loadSave();
-  if (save.username) dom.username.value = save.username;
+  if (save.username && dom.claimName) dom.claimName.value = save.username;
   if (!save.bestTime) return;
   dom.bestScore.innerHTML =
     `Best clear: <strong>${formatTime(save.bestTime)}</strong> · ` +
@@ -1058,8 +1373,15 @@ function spawnBoxes() {
 
   state.boxes = [];
   for (let i = 0; i < BOX_COUNT; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const radius = minRadius + Math.sqrt(Math.random()) * (maxRadius - minRadius);
+    let angle = Math.random() * Math.PI * 2;
+    let radius = minRadius + Math.sqrt(Math.random()) * (maxRadius - minRadius);
+
+    // Debug: spawn exactly N meters ahead of starting facing (north = -y).
+    if (Number.isFinite(DEBUG_AT_M) && DEBUG_AT_M > 0) {
+      angle = -Math.PI / 2; // screen "up" / north
+      radius = DEBUG_AT_M * FT_PER_M;
+    }
+
     state.boxes.push({
       id: i,
       x: center + radius * Math.cos(angle),
@@ -1084,7 +1406,14 @@ function buildWorld() {
     node.style.top = `${(box.y - ROOM_SIZE_FT / 2) * PIXEL_SCALE}px`;
     node.addEventListener("click", (e) => {
       e.stopPropagation();
-      collect(box);
+      // Radar tap no longer auto-collects — guide into AR flow.
+      const distM = ftToM(distanceTo(box));
+      if (distM <= AR_RANGE_M) {
+        flash('Signal hot — tap "Open AR Camera"');
+        updateHotZoneCta();
+      } else {
+        flash("Too far — follow the radar.");
+      }
     });
     box.node = node;
     dom.boxes.appendChild(node);
@@ -1658,7 +1987,41 @@ function updateProximityUI() {
 }
 
 /* =========================================================================
-   AR view — camera overlay within ~20 m
+   Phase machine + hot-zone CTA
+   ========================================================================= */
+
+function setPhase(phase) {
+  state.phase = phase;
+  updateDebugPanel();
+  updateHotZoneCta();
+}
+
+function updateHotZoneCta() {
+  if (!dom.btnOpenAr) return;
+  const inHot =
+    state.playing &&
+    !state.finished &&
+    !state.chestOpened &&
+    state.nearest.id !== -1 &&
+    ftToM(state.nearest.distance) <= AR_RANGE_M;
+  const show = inHot && !state.arUserOpened && state.phase !== "ar_scan";
+  dom.btnOpenAr.classList.toggle("hidden", !show);
+}
+
+function updateDebugPanel() {
+  if (!dom.debugPanel || !DEBUG_MOVE) return;
+  dom.debugPanel.classList.remove("hidden");
+  const dist =
+    state.nearest.id === -1 ? "—" : `${ftToM(state.nearest.distance).toFixed(1)} m`;
+  dom.debugPhase.textContent =
+    `phase: ${state.phase} · dist ${dist}` +
+    (state.arUserOpened ? " · AR" : "") +
+    (state.chestPlaced ? " · placed" : "") +
+    (state.chestOpened ? " · opened" : "");
+}
+
+/* =========================================================================
+   AR view — manual Open AR Camera + geofenced chest placement
    ========================================================================= */
 
 async function ensureARCamera() {
@@ -1673,8 +2036,9 @@ async function ensureARCamera() {
     ar.videoReady = true;
     return true;
   } catch {
+    // Debug/desktop fallback: continue without camera so flow is still testable.
     ar.videoReady = false;
-    return false;
+    return DEBUG_MOVE;
   }
 }
 
@@ -1690,19 +2054,74 @@ function stopARCamera() {
   dom.screenGame.classList.remove("ar-active");
 }
 
-function shouldShowAR() {
-  if (!state.playing || state.finished || state.nearest.id === -1) return false;
-  if (state.arManualRadar) return false;
-  return ftToM(state.nearest.distance) <= AR_RANGE_M;
+async function openARCamera() {
+  if (!state.playing || state.finished || state.chestOpened) return;
+  if (state.nearest.id === -1 || ftToM(state.nearest.distance) > AR_RANGE_M) {
+    flash("Get within 20 m first.");
+    return;
+  }
+
+  state.arUserOpened = true;
+  setPhase("ar_scan");
+  const ok = await ensureARCamera();
+  if (!ok && !DEBUG_MOVE) {
+    flash("Camera blocked — allow camera and try again.");
+    state.arUserOpened = false;
+    setPhase("hot");
+    return;
+  }
+
+  ar.active = true;
+  dom.arLayer.classList.remove("hidden");
+  dom.screenGame.classList.add("ar-active");
+  updateHotZoneCta();
+  updateARView();
+  buzz(40);
+  flash(ok ? "Scan surroundings…" : "Debug AR (no camera) — warp closer to place");
+}
+
+function closeARToRadar() {
+  if (state.chestOpened) return;
+  state.arUserOpened = false;
+  state.chestPlaced = false;
+  ar.active = false;
+  dom.arLayer.classList.add("hidden");
+  dom.screenGame.classList.remove("ar-active");
+  if (dom.btnVictorySelfie) dom.btnVictorySelfie.classList.add("hidden");
+  resetChestVisual();
+  const distM = state.nearest.id === -1 ? Infinity : ftToM(state.nearest.distance);
+  setPhase(distM <= AR_RANGE_M ? "hot" : "hunt");
+  updateHotZoneCta();
+}
+
+function resetChestVisual() {
+  if (!dom.arTargetWrap) return;
+  dom.arTargetWrap.classList.add("hidden-chest");
+  dom.arTargetWrap.classList.remove("placed", "opened");
+  dom.arTarget.textContent = "📦";
+  dom.arTargetWrap.style.pointerEvents = "none";
+}
+
+function shouldPlaceChest() {
+  if (!state.arUserOpened || state.chestOpened || state.nearest.id === -1) return false;
+  return ftToM(state.nearest.distance) <= PLACE_RANGE_M;
 }
 
 async function updateARView() {
-  if (state.nearest.id !== -1 && ftToM(state.nearest.distance) > AR_RANGE_M + 3) {
-    state.arManualRadar = false;
+  // Sync hunt/hot phase while on radar.
+  if (state.playing && !state.finished && !state.arUserOpened && !state.chestOpened) {
+    const distM = state.nearest.id === -1 ? Infinity : ftToM(state.nearest.distance);
+    const next = distM <= AR_RANGE_M ? "hot" : "hunt";
+    if (state.phase !== next && (state.phase === "hunt" || state.phase === "hot")) {
+      setPhase(next);
+    } else {
+      updateHotZoneCta();
+      updateDebugPanel();
+    }
   }
 
-  if (!shouldShowAR()) {
-    if (ar.active) {
+  if (!state.arUserOpened || state.finished) {
+    if (ar.active && !state.chestOpened) {
       ar.active = false;
       dom.arLayer.classList.add("hidden");
       dom.screenGame.classList.remove("ar-active");
@@ -1711,41 +2130,371 @@ async function updateARView() {
     return;
   }
 
-  if (!ar.videoReady) await ensureARCamera();
+  if (!ar.active) {
+    ar.active = true;
+    dom.arLayer.classList.remove("hidden");
+    dom.screenGame.classList.add("ar-active");
+  }
 
-  ar.active = true;
-  dom.arLayer.classList.remove("hidden");
-  dom.screenGame.classList.add("ar-active");
+  if (!ar.videoReady && !ar.stream) await ensureARCamera();
 
   const distFt = state.nearest.distance;
-  const distM = ftToM(distFt);
+  const distM = state.nearest.id === -1 ? Infinity : ftToM(distFt);
   const bearingToTarget = state.nearest.angle * (Math.PI / 180);
   const rel = ((bearingToTarget - state.heading + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
   const relDeg = rel * (180 / Math.PI);
 
-  // Horizontal placement from relative bearing (-90..90 visible arc).
-  const maxOffset = innerWidth * 0.38;
-  const xOff = (relDeg / 55) * maxOffset;
-  const clampedX = Math.max(-maxOffset, Math.min(maxOffset, xOff));
+  const place = shouldPlaceChest();
+  state.chestPlaced = place && !state.chestOpened;
 
-  // Scale up as player approaches (large within 20 m, huge under 8 m).
-  const scale = Math.min(3.8, 0.55 + (1 - distM / AR_RANGE_M) * 2.8 + (distM < FLASH_RANGE_M ? 0.6 : 0));
-  const yOff = Math.min(80, (1 - distM / AR_RANGE_M) * 60);
+  if (dom.arScanHint) {
+    if (state.chestOpened) {
+      dom.arScanHint.textContent = "Treasure opened!";
+    } else if (place) {
+      dom.arScanHint.textContent = "Treasure locked — tap the chest to open";
+    } else if (distM <= AR_RANGE_M) {
+      dom.arScanHint.textContent = `Scan the ground — ${distM.toFixed(1)} m to place zone`;
+    } else {
+      dom.arScanHint.textContent = "Signal fading — return within 20 m";
+    }
+  }
 
-  dom.arTargetWrap.style.transform =
-    `translate(calc(-50% + ${clampedX}px), calc(-50% + ${yOff}px)) scale(${scale})`;
-  dom.arTargetWrap.style.opacity = Math.abs(relDeg) > 85 ? "0.25" : "1";
+  if (state.chestOpened) {
+    dom.arTargetWrap.classList.remove("hidden-chest");
+    dom.arTargetWrap.classList.add("opened");
+    dom.arTargetWrap.classList.remove("placed");
+    dom.arTarget.textContent = "✨";
+    dom.arTargetWrap.style.pointerEvents = "none";
+    dom.arTargetWrap.style.opacity = "1";
+    dom.arTargetWrap.style.transform = "translate(-50%, -40%) scale(2.2)";
+  } else if (place) {
+    const maxOffset = innerWidth * 0.38;
+    const xOff = (relDeg / 55) * maxOffset;
+    const clampedX = Math.max(-maxOffset, Math.min(maxOffset, xOff));
+    // Ground-biased placement (lower in frame as you approach).
+    const groundY = 70 + Math.min(90, (1 - distM / PLACE_RANGE_M) * 80);
+    const scale = Math.min(3.2, 1.1 + (1 - distM / PLACE_RANGE_M) * 1.8);
+
+    dom.arTargetWrap.classList.remove("hidden-chest");
+    dom.arTargetWrap.classList.add("placed");
+    dom.arTargetWrap.classList.remove("opened");
+    dom.arTarget.textContent = "📦";
+    dom.arTargetWrap.style.transform =
+      `translate(calc(-50% + ${clampedX}px), calc(-50% + ${groundY}px)) scale(${scale})`;
+    dom.arTargetWrap.style.opacity = Math.abs(relDeg) > 85 ? "0.35" : "1";
+    dom.arTargetWrap.style.pointerEvents = "auto";
+    dom.arTarget.style.cursor = "pointer";
+  } else {
+    resetChestVisual();
+  }
 
   const flashOn = distM <= FLASH_RANGE_M;
   dom.arFlash.classList.toggle("active", flashOn);
+  updateDebugPanel();
+}
 
-  dom.arTarget.style.cursor = distFt <= PICKUP_RANGE ? "pointer" : "default";
-  dom.arTargetWrap.style.pointerEvents = distFt <= PICKUP_RANGE ? "auto" : "none";
+function openTreasureChest() {
+  if (!state.arUserOpened || state.chestOpened) return;
+  if (!shouldPlaceChest() && !DEBUG_MOVE) {
+    flash("Move closer to place the chest.");
+    return;
+  }
+  // In debug, allow force-open when place was forced.
+  if (!state.chestPlaced && !shouldPlaceChest()) {
+    state.chestPlaced = true;
+  }
+
+  const box = state.boxes.find((b) => b.id === state.nearest.id && !b.collected)
+    || state.boxes.find((b) => !b.collected);
+  if (!box) return;
+
+  state.chestOpened = true;
+  box.collected = true;
+  state.inventory.push(box.id);
+  state.points += 10;
+  setPhase("chest_open");
+  buzz([30, 40, 80, 40, 120]);
+  burst(innerWidth / 2, innerHeight * 0.45, 50);
+  flash("Treasure opened!");
+  updateARView();
+
+  if (dom.btnVictorySelfie) {
+    dom.btnVictorySelfie.classList.remove("hidden");
+  }
+  render();
 }
 
 function collectNearestFromAR() {
-  const box = state.boxes.find((b) => b.id === state.nearest.id && !b.collected);
-  if (box) collect(box);
+  openTreasureChest();
+}
+
+/* =========================================================================
+   Victory selfie
+   ========================================================================= */
+
+async function ensureSelfieCamera() {
+  stopARCamera();
+  if (selfie.stream) return true;
+  if (!navigator.mediaDevices?.getUserMedia) return DEBUG_MOVE;
+  try {
+    selfie.stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "user" }, width: { ideal: 720 }, height: { ideal: 960 } },
+      audio: false,
+    });
+    dom.selfieVideo.srcObject = selfie.stream;
+    await dom.selfieVideo.play();
+    return true;
+  } catch {
+    return DEBUG_MOVE;
+  }
+}
+
+function stopSelfieCamera() {
+  if (selfie.stream) {
+    selfie.stream.getTracks().forEach((t) => t.stop());
+    selfie.stream = null;
+  }
+  if (dom.selfieVideo) dom.selfieVideo.srcObject = null;
+}
+
+async function startVictorySelfie() {
+  if (!state.chestOpened) return;
+  setPhase("selfie");
+  if (dom.btnVictorySelfie) dom.btnVictorySelfie.classList.add("hidden");
+  dom.overlaySelfie.classList.remove("hidden");
+
+  dom.selfiePreview.classList.add("hidden");
+  dom.btnSelfieCapture.classList.remove("hidden");
+  dom.btnSelfieRetake.classList.add("hidden");
+  dom.btnSelfieUse.classList.add("hidden");
+  dom.selfieCountdown.classList.add("hidden");
+
+  const ok = await ensureSelfieCamera();
+  if (!ok) {
+    // Placeholder frame for desktop debug without camera.
+    state.selfieDataUrl = makeDebugSelfiePlaceholder();
+    dom.selfiePreview.src = state.selfieDataUrl;
+    dom.selfiePreview.classList.remove("hidden");
+    dom.btnSelfieCapture.classList.add("hidden");
+    dom.btnSelfieRetake.classList.add("hidden");
+    dom.btnSelfieUse.classList.remove("hidden");
+    flash("Debug selfie placeholder (no front camera)");
+  }
+}
+
+function makeDebugSelfiePlaceholder() {
+  const c = document.createElement("canvas");
+  c.width = 720;
+  c.height = 960;
+  const ctx = c.getContext("2d");
+  const g = ctx.createLinearGradient(0, 0, 0, 960);
+  g.addColorStop(0, "#1e293b");
+  g.addColorStop(1, "#0f172a");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 720, 960);
+  ctx.fillStyle = "#fbbf24";
+  ctx.font = "bold 48px system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("VICTORY", 360, 420);
+  ctx.fillStyle = "#fff";
+  ctx.font = "28px system-ui, sans-serif";
+  ctx.fillText("Debug selfie", 360, 480);
+  ctx.font = "80px system-ui, sans-serif";
+  ctx.fillText("📦", 360, 580);
+  return c.toDataURL("image/jpeg", 0.92);
+}
+
+async function captureSelfie() {
+  if (selfie.capturing) return;
+  selfie.capturing = true;
+  dom.btnSelfieCapture.classList.add("hidden");
+
+  for (const n of [3, 2, 1]) {
+    dom.selfieCountdown.textContent = String(n);
+    dom.selfieCountdown.classList.remove("hidden");
+    await new Promise((r) => setTimeout(r, 700));
+  }
+  dom.selfieCountdown.classList.add("hidden");
+
+  const video = dom.selfieVideo;
+  if (video && video.videoWidth) {
+    const c = document.createElement("canvas");
+    c.width = video.videoWidth;
+    c.height = video.videoHeight;
+    const ctx = c.getContext("2d");
+    // Mirror selfie for natural preview.
+    ctx.translate(c.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, 0, 0);
+    // Banner
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = "rgba(0,0,0,0.45)";
+    ctx.fillRect(0, c.height - 90, c.width, 90);
+    ctx.fillStyle = "#fbbf24";
+    ctx.font = `bold ${Math.round(c.width * 0.06)}px system-ui, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.fillText("I FOUND THE TREASURE", c.width / 2, c.height - 36);
+    state.selfieDataUrl = c.toDataURL("image/jpeg", 0.92);
+  } else {
+    state.selfieDataUrl = makeDebugSelfiePlaceholder();
+  }
+
+  dom.selfiePreview.src = state.selfieDataUrl;
+  dom.selfiePreview.classList.remove("hidden");
+  dom.btnSelfieRetake.classList.remove("hidden");
+  dom.btnSelfieUse.classList.remove("hidden");
+  selfie.capturing = false;
+  buzz(50);
+}
+
+function retakeSelfie() {
+  state.selfieDataUrl = null;
+  dom.selfiePreview.classList.add("hidden");
+  dom.btnSelfieRetake.classList.add("hidden");
+  dom.btnSelfieUse.classList.add("hidden");
+  dom.btnSelfieCapture.classList.remove("hidden");
+  ensureSelfieCamera();
+}
+
+function useSelfieAndClaim() {
+  if (!state.selfieDataUrl) {
+    state.selfieDataUrl = makeDebugSelfiePlaceholder();
+  }
+  stopSelfieCamera();
+  dom.overlaySelfie.classList.add("hidden");
+  openClaimForm();
+}
+
+function openClaimForm() {
+  setPhase("claim");
+  dom.overlayClaim.classList.remove("hidden");
+  if (state.selfieDataUrl) {
+    dom.claimThumb.src = state.selfieDataUrl;
+    dom.claimThumb.classList.remove("hidden");
+  }
+  const save = loadSave();
+  if (save.username && !dom.claimName.value) dom.claimName.value = save.username;
+  dom.claimName.focus();
+}
+
+async function shareToClaim() {
+  const name = dom.claimName.value.trim();
+  const phone = dom.claimPhone.value.trim();
+  if (!name) {
+    dom.claimName.focus();
+    flash("Name required");
+    return;
+  }
+  if (!phone || phone.replace(/\D/g, "").length < 7) {
+    dom.claimPhone.focus();
+    flash("Valid phone required");
+    return;
+  }
+
+  state.username = name;
+  state.phone = phone;
+
+  const payload = {
+    name,
+    phone,
+    time: formatTime(state.elapsed),
+    points: state.points,
+    walkedFt: Math.round(state.walkedFt),
+    claimedAt: new Date().toISOString(),
+  };
+
+  try {
+    localStorage.setItem(
+      STORAGE_KEY + "_claim",
+      JSON.stringify({ ...payload, hasSelfie: !!state.selfieDataUrl })
+    );
+  } catch { /* ignore */ }
+
+  const shareText =
+    `I claimed the Treasure Radar win!\n` +
+    `Name: ${name}\nPhone: ${phone}\nTime: ${payload.time} · ${payload.points} pts`;
+
+  try {
+    if (navigator.share) {
+      const data = { title: "Treasure Radar Claim", text: shareText };
+      if (state.selfieDataUrl && navigator.canShare) {
+        try {
+          const blob = await (await fetch(state.selfieDataUrl)).blob();
+          const file = new File([blob], "victory-selfie.jpg", { type: "image/jpeg" });
+          if (navigator.canShare({ files: [file] })) {
+            data.files = [file];
+          }
+        } catch { /* text-only share */ }
+      }
+      await navigator.share(data);
+    } else if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(shareText);
+      flash("Claim copied to clipboard");
+    }
+  } catch (err) {
+    if (err && err.name === "AbortError") {
+      /* user cancelled share — still complete claim */
+    } else {
+      flash("Shared locally — claim saved");
+    }
+  }
+
+  dom.overlayClaim.classList.add("hidden");
+  finish(false);
+}
+
+/* =========================================================================
+   Debug QA helpers (?debug=1)
+   ========================================================================= */
+
+function debugWarpTreasure(metersAhead) {
+  if (!DEBUG_MOVE || !state.boxes.length) return;
+  const box = state.boxes.find((b) => !b.collected) || state.boxes[0];
+  const distFt = metersAhead * FT_PER_M;
+  // Place along current facing.
+  box.x = state.pos.x + Math.sin(state.heading) * distFt;
+  box.y = state.pos.y - Math.cos(state.heading) * distFt;
+  box.collected = false;
+  state.chestOpened = false;
+  state.chestPlaced = false;
+  if (state.arUserOpened) setPhase("ar_scan");
+  else setPhase(metersAhead <= AR_RANGE_M ? "hot" : "hunt");
+  if (dom.btnVictorySelfie) dom.btnVictorySelfie.classList.add("hidden");
+  resetChestVisual();
+  render();
+  flash(`Debug: treasure ~${metersAhead} m ahead`);
+}
+
+function debugForcePlace() {
+  if (!DEBUG_MOVE) return;
+  if (!state.arUserOpened) openARCamera();
+  debugWarpTreasure(5);
+  state.chestPlaced = true;
+  setPhase("ar_scan");
+  updateARView();
+  flash("Debug: chest forced into place zone");
+}
+
+async function debugSkipTo(target) {
+  if (!DEBUG_MOVE) return;
+  if (!state.playing) return;
+
+  if (target === "ar" || target === "open" || target === "selfie" || target === "claim") {
+    debugWarpTreasure(5);
+    state.arUserOpened = true;
+    await openARCamera();
+  }
+  if (target === "open" || target === "selfie" || target === "claim") {
+    state.chestPlaced = true;
+    openTreasureChest();
+  }
+  if (target === "selfie" || target === "claim") {
+    await startVictorySelfie();
+  }
+  if (target === "claim") {
+    if (!state.selfieDataUrl) state.selfieDataUrl = makeDebugSelfiePlaceholder();
+    useSelfieAndClaim();
+  }
 }
 
 /* =========================================================================
@@ -1851,24 +2600,9 @@ function tickClock() {
    ========================================================================= */
 
 function collect(box) {
-  if (box.collected || !state.playing) return;
-
-  if (distanceTo(box) > PICKUP_RANGE) {
-    flash("Too far — move closer.");
-    return;
-  }
-
-  box.collected = true;
-  state.inventory.push(box.id);
-  state.points += 10;
-  buzz([30, 40, 60]);
-  flash("Added to bag! 🎒");
-  burst(innerWidth / 2, innerHeight / 2, 40);
-  render();
-
-  if (state.inventory.length === BOX_COUNT) {
-    setTimeout(() => finish(false), 700);
-  }
+  // Radar collect disabled — players open the chest in AR.
+  if (!box || box.collected || !state.playing) return;
+  flash('Use "Open AR Camera", then tap the chest.');
 }
 
 /* =========================================================================
@@ -2026,17 +2760,7 @@ function requestGpsFix() {
 }
 
 async function play() {
-  const name = dom.username.value.trim();
-  if (!name) {
-    dom.username.focus();
-    dom.username.placeholder = "Name required!";
-    return;
-  }
-
-  state.username = name;
-
   // Unlock detector audio DURING the PLAY tap (required on iOS/Android).
-  // Plays an audible confirmation beep so you know sound works.
   const audioOk = await unlockDetectorAudio(true);
   if (!audioOk) {
     flash("Sound blocked — unmute phone media volume and tap PLAY again");
@@ -2051,13 +2775,11 @@ async function play() {
   setGpsStatus("GPS · requesting…");
 
   // CRITICAL: start GPS while we still have the user gesture from PLAY.
-  // Awaiting orientation (or anything else) first causes silent PERMISSION_DENIED on mobile.
   let gpsResult = { ok: true, pos: null };
   if (!DEBUG_MOVE) {
     gpsResult = await requestGpsFix();
   }
 
-  // Orientation can wait until after GPS — it is optional for movement.
   await requestOrientationPermission();
 
   if (!DEBUG_MOVE && !gpsResult.ok) {
@@ -2091,6 +2813,10 @@ async function play() {
   dom.screenStart.classList.add("hidden");
   dom.screenGame.classList.remove("hidden");
   dom.controls.classList.toggle("hidden", !DEBUG_MOVE);
+  if (DEBUG_MOVE) {
+    dom.debugPanel.classList.remove("hidden");
+    updateDebugPanel();
+  }
 
   attachCompass();
   acquireWakeLock();
@@ -2105,11 +2831,18 @@ function resetRun() {
   stopGpsWatch();
   stopProximityDetector();
   stopARCamera();
+  stopSelfieCamera();
   stopBackgroundKeepAlive();
   releaseWakeLock();
   state.playing = false;
   state.finished = false;
-  state.arManualRadar = false;
+  state.phase = "hunt";
+  state.arUserOpened = false;
+  state.chestPlaced = false;
+  state.chestOpened = false;
+  state.selfieDataUrl = null;
+  state.username = "";
+  state.phone = "";
   state.bgPaused = false;
   gps.hiddenUpdates = 0;
   state.pos = { x: ROOM_SIZE_FT / 2, y: ROOM_SIZE_FT / 2 };
@@ -2124,12 +2857,19 @@ function resetRun() {
   gps.origin = null;
   gps.lastAccepted = null;
 
+  if (dom.overlaySelfie) dom.overlaySelfie.classList.add("hidden");
+  if (dom.overlayClaim) dom.overlayClaim.classList.add("hidden");
+  if (dom.btnVictorySelfie) dom.btnVictorySelfie.classList.add("hidden");
+  if (dom.btnOpenAr) dom.btnOpenAr.classList.add("hidden");
+  resetChestVisual();
+
   spawnBoxes();
   buildWorld();
   render();
   dom.statTime.textContent = "0:00";
   dom.message.textContent = "";
   setGpsStatus(DEBUG_MOVE ? "DEBUG MOVE" : "GPS · waiting");
+  updateDebugPanel();
 }
 
 function runCountdown() {
@@ -2158,43 +2898,59 @@ function showCountdownFrame(text) {
   dom.countdownText.replaceWith(fresh);
   dom.countdownText = fresh;
   dom.countdownSub.textContent =
-    text === "GO! 🏃" ? "Walk outdoors — GPS tracks you" : "Locking GPS origin";
+    text === "GO! 🏃"
+      ? (DEBUG_MOVE ? "Sandbox — use D-pad + debug panel" : "Walk outdoors — GPS tracks you")
+      : "Locking GPS origin";
 }
 
 function beginPlay() {
   state.playing = true;
   state.startedAt = Date.now();
-  state.arManualRadar = false;
+  state.arUserOpened = false;
   gps.hiddenUpdates = 0;
   if (!DEBUG_MOVE && !state.compassEnabled) {
     toggleCompass(true);
   }
   startProximityDetector();
-  // Only chirp if already inside 20 m (e.g. debug near spawn).
   if (state.nearest.id !== -1 && ftToM(state.nearest.distance) <= PROX_ALERT_M) {
     playDetectorBeep(0.35);
+    setPhase("hot");
+  } else {
+    setPhase("hunt");
   }
   acquireWakeLock();
   startBackgroundKeepAlive();
   updateBackgroundStatus();
+  updateHotZoneCta();
+  updateDebugPanel();
+
+  // Optional URL skip for QA: ?debug=1&near=1&skip=selfie
+  if (DEBUG_SKIP) {
+    setTimeout(() => debugSkipTo(DEBUG_SKIP), 400);
+  }
 }
 
 function finish(quit) {
   if (state.finished) return;
   state.finished = true;
   state.playing = false;
+  setPhase(quit ? "done" : "done");
   stopGpsWatch();
   stopProximityDetector();
   stopARCamera();
+  stopSelfieCamera();
   stopBackgroundKeepAlive();
   releaseWakeLock();
+  if (dom.btnOpenAr) dom.btnOpenAr.classList.add("hidden");
+  if (dom.overlaySelfie) dom.overlaySelfie.classList.add("hidden");
+  if (dom.overlayClaim) dom.overlayClaim.classList.add("hidden");
   recordRun();
 
   dom.resultTitle.textContent = quit ? "MISSION ABORTED" : "MISSION COMPLETE";
-  dom.resultName.textContent = state.username;
+  dom.resultName.textContent = state.username || "Hunter";
   dom.resultBoxes.innerHTML = state.inventory.length
     ? state.inventory.map(() => "📦").join("")
-    : `<span style="font-size:13px;color:#52525b">No crates collected</span>`;
+    : `<span style="font-size:13px;color:#52525b">No treasure claimed</span>`;
   dom.resultTime.textContent = formatTime(state.elapsed);
   dom.resultWalked.textContent = `${Math.round(state.walkedFt)} ft`;
   dom.resultPoints.textContent = state.points;
@@ -2550,7 +3306,6 @@ el("btn-test-sound").addEventListener("click", async () => {
     );
   }
 });
-dom.username.addEventListener("keydown", (e) => { if (e.key === "Enter") play(); });
 
 el("btn-bag").addEventListener("click", openBag);
 el("btn-bag-close").addEventListener("click", () => dom.overlayBag.classList.add("hidden"));
@@ -2586,26 +3341,58 @@ el("ctrl-right").addEventListener("click", () => {
 });
 
 dom.compass.addEventListener("click", toggleCompass);
-dom.btnArBack.addEventListener("click", () => {
-  state.arManualRadar = true;
-  updateARView();
+dom.btnOpenAr.addEventListener("click", () => {
+  unlockDetectorAudio(false);
+  openARCamera();
 });
+dom.btnArBack.addEventListener("click", closeARToRadar);
 dom.arTarget.addEventListener("click", collectNearestFromAR);
+dom.btnVictorySelfie.addEventListener("click", () => {
+  unlockDetectorAudio(false);
+  startVictorySelfie();
+});
+dom.btnSelfieCapture.addEventListener("click", captureSelfie);
+dom.btnSelfieRetake.addEventListener("click", retakeSelfie);
+dom.btnSelfieUse.addEventListener("click", useSelfieAndClaim);
+dom.btnClaimShare.addEventListener("click", shareToClaim);
+
+if (DEBUG_MOVE) {
+  el("dbg-warp-15").addEventListener("click", () => debugWarpTreasure(15));
+  el("dbg-warp-5").addEventListener("click", () => debugWarpTreasure(5));
+  el("dbg-open-ar").addEventListener("click", () => {
+    unlockDetectorAudio(false);
+    if (state.nearest.id !== -1 && ftToM(state.nearest.distance) > AR_RANGE_M) {
+      debugWarpTreasure(15);
+    }
+    openARCamera();
+  });
+  el("dbg-force-place").addEventListener("click", debugForcePlace);
+  el("dbg-open-chest").addEventListener("click", () => {
+    state.chestPlaced = true;
+    openTreasureChest();
+  });
+  el("dbg-selfie").addEventListener("click", () => debugSkipTo("selfie"));
+  el("dbg-claim").addEventListener("click", () => debugSkipTo("claim"));
+  dom.debugPanel.classList.remove("hidden");
+  updateDebugPanel();
+}
 
 window.addEventListener("keydown", onKeyDown);
 window.addEventListener("resize", resizeFx);
 
-// Spell out what the active preset actually demands of the player's surroundings.
 const maxSpawnRadius = Math.max(MIN_RADIUS + 1, ROOM_SIZE_FT / 2 - 5);
 const spaceNeeded = Math.ceil((maxSpawnRadius * 2) / 10) * 10;
 el("tagline").innerHTML =
-  `${BOX_COUNT} crates are scattered up to ${Math.round(maxSpawnRadius)} ft away.<br />` +
-  `Follow the radar — <b>real GPS walking required</b>.<br />` +
+  `Find the hidden treasure with live distance + metal detector.<br />` +
+  `≤20&nbsp;m → Open AR → tap chest → victory selfie → claim.<br />` +
   `<span style="color:#64748b">Needs roughly ${spaceNeeded} ft of open outdoor space.</span>`;
 
 if (DEBUG_MOVE) {
   el("tagline").innerHTML +=
-    `<br /><span style="color:#fbbf24">Sandbox: no GPS — use ▲◀▶▼ or WASD to move in place.${DEBUG_NEAR ? " Crates spawned ~8–18 m away." : ""}</span>`;
+    `<br /><span style="color:#fbbf24">Sandbox ON — D-pad/WASD + yellow Debug QA panel.` +
+    `${DEBUG_NEAR ? " near=1 (~8–18 m)." : ""}` +
+    `${Number.isFinite(DEBUG_AT_M) ? ` at=${DEBUG_AT_M}m.` : ""}` +
+    `${DEBUG_SKIP ? ` skip=${DEBUG_SKIP}.` : ""}</span>`;
 }
 
 const secureWarn = el("secure-warn");
@@ -2615,7 +3402,8 @@ if (isLocalFileUrl()) {
     secureWarn.innerHTML =
       `<strong>Opened as a file — GPS will not work.</strong><br />` +
       `Address shows <code>${location.protocol}//…</code> (local file). ` +
-      `Upload to your server and open <code>https://your-domain/…</code> instead.`;
+      `Upload to your server and open <code>https://your-domain/…</code> instead.` +
+      ` Or use <code>?debug=1&amp;near=1</code> to test seated.`;
   } else {
     secureWarn.innerHTML =
       `<strong>GPS will not work on this URL.</strong><br />` +
