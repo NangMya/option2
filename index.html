@@ -918,8 +918,8 @@
     <p id="best-score" class="best-score hidden"></p>
 
     <div class="hint">
-      <b>Hunt:</b> walk with GPS → metal detector ≤20&nbsp;m → <b>Open AR Camera</b> → tap chest → victory selfie → claim.<br />
-      <b>Sandbox:</b> <code>?debug=1&amp;near=1</code> — D-pad / WASD + debug panel (no outdoor walk).
+      <b>Hunt:</b> walk with GPS → metal detector ≤20&nbsp;m → <b>Open AR Camera</b> → open all <b>3</b> chests → victory selfie → claim.<br />
+      <b>Sandbox:</b> <code>?debug=1&amp;near=1</code> — WASD / arrows move on map (no GPS). Yellow card = <b>Warp to map</b>.
     </div>
     <div id="secure-warn" class="warn-box hidden"></div>
   </div>
@@ -1080,18 +1080,15 @@
   </div>
 </div>
 
-<!-- Debug QA panel (?debug=1) -->
+<!-- Debug: map warp only (?debug=1) — move with WASD / arrows -->
 <div id="debug-panel" class="hidden">
-  <div class="dbg-title">Debug QA</div>
-  <div id="debug-phase" class="dbg-phase">phase: —</div>
+  <div class="dbg-title">Warp to map</div>
+  <div id="debug-phase" class="dbg-phase">dist — · WASD / ▲◀▼▶</div>
   <div class="dbg-btns">
-    <button type="button" id="dbg-warp-15" title="Place treasure ~15 m ahead">Warp · 15 m</button>
-    <button type="button" id="dbg-warp-5" title="Place treasure ~5 m ahead (place zone)">Warp · 5 m</button>
-    <button type="button" id="dbg-open-ar">Open AR</button>
-    <button type="button" id="dbg-force-place">Force place chest</button>
-    <button type="button" id="dbg-open-chest">Open chest</button>
-    <button type="button" id="dbg-selfie">→ Selfie</button>
-    <button type="button" id="dbg-claim">→ Claim</button>
+    <button type="button" id="dbg-warp-40" title="Teleport on map ~40 m from treasure">Far · 40 m</button>
+    <button type="button" id="dbg-warp-20" title="Teleport on map ~20 m (hot zone)">Hot · 20 m</button>
+    <button type="button" id="dbg-warp-10" title="Teleport on map ~10 m (place zone)">Place · 10 m</button>
+    <button type="button" id="dbg-warp-5" title="Teleport on map ~5 m">Near · 5 m</button>
   </div>
 </div>
 
@@ -1122,7 +1119,7 @@ const ROOM_SIZE_FT = PRESET.roomSize;
 const PIXEL_SCALE  = PRESET.pixelScale;
 const PICKUP_RANGE = PRESET.pickupRange;
 const MIN_RADIUS   = PRESET.minRadius;
-const BOX_COUNT    = 1; // single treasure hunt
+const BOX_COUNT    = 3; // live + debug
 const TURN_STEP    = 15;
 
 const GRID_FT = Math.max(1, Math.round(100 / PIXEL_SCALE));
@@ -1151,8 +1148,6 @@ const DEBUG_NEAR =
   (urlParams.has("near") || urlParams.get("debug") === "near");
 // Optional: ?at=5 | ?at=15 — spawn treasure at exact meters ahead (debug)
 const DEBUG_AT_M = DEBUG_MOVE ? Number(urlParams.get("at")) : NaN;
-// Optional: ?skip=ar|open|selfie|claim — jump after GO!
-const DEBUG_SKIP = DEBUG_MOVE ? (urlParams.get("skip") || "").toLowerCase() : "";
 const STORAGE_KEY = "treasure_radar_save";
 
 /* =========================================================================
@@ -1376,9 +1371,10 @@ function spawnBoxes() {
     let angle = Math.random() * Math.PI * 2;
     let radius = minRadius + Math.sqrt(Math.random()) * (maxRadius - minRadius);
 
-    // Debug: spawn exactly N meters ahead of starting facing (north = -y).
+    // Debug: spawn around N meters ahead, spread so boxes don't stack.
     if (Number.isFinite(DEBUG_AT_M) && DEBUG_AT_M > 0) {
-      angle = -Math.PI / 2; // screen "up" / north
+      const spread = (i - (BOX_COUNT - 1) / 2) * 0.55;
+      angle = -Math.PI / 2 + spread;
       radius = DEBUG_AT_M * FT_PER_M;
     }
 
@@ -1998,10 +1994,12 @@ function setPhase(phase) {
 
 function updateHotZoneCta() {
   if (!dom.btnOpenAr) return;
+  const remaining = state.boxes.some((b) => !b.collected);
   const inHot =
     state.playing &&
     !state.finished &&
-    !state.chestOpened &&
+    remaining &&
+    state.inventory.length < BOX_COUNT &&
     state.nearest.id !== -1 &&
     ftToM(state.nearest.distance) <= AR_RANGE_M;
   const show = inHot && !state.arUserOpened && state.phase !== "ar_scan";
@@ -2013,11 +2011,7 @@ function updateDebugPanel() {
   dom.debugPanel.classList.remove("hidden");
   const dist =
     state.nearest.id === -1 ? "—" : `${ftToM(state.nearest.distance).toFixed(1)} m`;
-  dom.debugPhase.textContent =
-    `phase: ${state.phase} · dist ${dist}` +
-    (state.arUserOpened ? " · AR" : "") +
-    (state.chestPlaced ? " · placed" : "") +
-    (state.chestOpened ? " · opened" : "");
+  dom.debugPhase.textContent = `dist ${dist} · WASD / ▲◀▼▶`;
 }
 
 /* =========================================================================
@@ -2055,13 +2049,14 @@ function stopARCamera() {
 }
 
 async function openARCamera() {
-  if (!state.playing || state.finished || state.chestOpened) return;
+  if (!state.playing || state.finished || state.inventory.length >= BOX_COUNT) return;
   if (state.nearest.id === -1 || ftToM(state.nearest.distance) > AR_RANGE_M) {
     flash("Get within 20 m first.");
     return;
   }
 
   state.arUserOpened = true;
+  state.chestPlaced = false;
   setPhase("ar_scan");
   const ok = await ensureARCamera();
   if (!ok && !DEBUG_MOVE) {
@@ -2081,7 +2076,7 @@ async function openARCamera() {
 }
 
 function closeARToRadar() {
-  if (state.chestOpened) return;
+  if (state.inventory.length >= BOX_COUNT && state.chestOpened) return;
   state.arUserOpened = false;
   state.chestPlaced = false;
   ar.active = false;
@@ -2194,12 +2189,11 @@ async function updateARView() {
 }
 
 function openTreasureChest() {
-  if (!state.arUserOpened || state.chestOpened) return;
+  if (!state.arUserOpened || state.inventory.length >= BOX_COUNT) return;
   if (!shouldPlaceChest() && !DEBUG_MOVE) {
     flash("Move closer to place the chest.");
     return;
   }
-  // In debug, allow force-open when place was forced.
   if (!state.chestPlaced && !shouldPlaceChest()) {
     state.chestPlaced = true;
   }
@@ -2208,18 +2202,33 @@ function openTreasureChest() {
     || state.boxes.find((b) => !b.collected);
   if (!box) return;
 
-  state.chestOpened = true;
   box.collected = true;
   state.inventory.push(box.id);
   state.points += 10;
-  setPhase("chest_open");
   buzz([30, 40, 80, 40, 120]);
   burst(innerWidth / 2, innerHeight * 0.45, 50);
-  flash("Treasure opened!");
-  updateARView();
 
-  if (dom.btnVictorySelfie) {
-    dom.btnVictorySelfie.classList.remove("hidden");
+  const left = BOX_COUNT - state.inventory.length;
+  if (left <= 0) {
+    state.chestOpened = true;
+    setPhase("chest_open");
+    flash("All 3 treasures opened!");
+    updateARView();
+    if (dom.btnVictorySelfie) {
+      dom.btnVictorySelfie.classList.remove("hidden");
+    }
+  } else {
+    flash(`Opened ${state.inventory.length}/${BOX_COUNT} — ${left} left on the radar`);
+    // Back to map hunt for the next box.
+    state.arUserOpened = false;
+    state.chestPlaced = false;
+    state.chestOpened = false;
+    ar.active = false;
+    dom.arLayer.classList.add("hidden");
+    dom.screenGame.classList.remove("ar-active");
+    if (dom.btnVictorySelfie) dom.btnVictorySelfie.classList.add("hidden");
+    resetChestVisual();
+    setPhase("hunt");
   }
   render();
 }
@@ -2258,7 +2267,10 @@ function stopSelfieCamera() {
 }
 
 async function startVictorySelfie() {
-  if (!state.chestOpened) return;
+  if (state.inventory.length < BOX_COUNT) {
+    flash(`Open all ${BOX_COUNT} treasures first.`);
+    return;
+  }
   setPhase("selfie");
   if (dom.btnVictorySelfie) dom.btnVictorySelfie.classList.add("hidden");
   dom.overlaySelfie.classList.remove("hidden");
@@ -2444,57 +2456,36 @@ async function shareToClaim() {
 }
 
 /* =========================================================================
-   Debug QA helpers (?debug=1)
+   Debug — no GPS; WASD/arrows move on map; panel warps distance on map
    ========================================================================= */
 
-function debugWarpTreasure(metersAhead) {
+/** Teleport the player on the radar so distance to treasure ≈ meters. */
+function debugWarpPlayerToDistance(meters) {
   if (!DEBUG_MOVE || !state.boxes.length) return;
   const box = state.boxes.find((b) => !b.collected) || state.boxes[0];
-  const distFt = metersAhead * FT_PER_M;
-  // Place along current facing.
-  box.x = state.pos.x + Math.sin(state.heading) * distFt;
-  box.y = state.pos.y - Math.cos(state.heading) * distFt;
-  box.collected = false;
-  state.chestOpened = false;
-  state.chestPlaced = false;
-  if (state.arUserOpened) setPhase("ar_scan");
-  else setPhase(metersAhead <= AR_RANGE_M ? "hot" : "hunt");
-  if (dom.btnVictorySelfie) dom.btnVictorySelfie.classList.add("hidden");
-  resetChestVisual();
+  const distFt = Math.max(1, meters * FT_PER_M);
+
+  // Keep approach direction: from player toward box, or face heading if overlapping.
+  let dx = box.x - state.pos.x;
+  let dy = box.y - state.pos.y;
+  let len = Math.hypot(dx, dy);
+  if (len < 0.5) {
+    dx = Math.sin(state.heading);
+    dy = -Math.cos(state.heading);
+    len = 1;
+  }
+  dx /= len;
+  dy /= len;
+
+  // Stand `distFt` away from the box along that line (outside looking in).
+  const x = box.x - dx * distFt;
+  const y = box.y - dy * distFt;
+  applyPosition(x, y);
+  // Face the treasure.
+  state.heading = Math.atan2(box.x - state.pos.x, -(box.y - state.pos.y));
   render();
-  flash(`Debug: treasure ~${metersAhead} m ahead`);
-}
-
-function debugForcePlace() {
-  if (!DEBUG_MOVE) return;
-  if (!state.arUserOpened) openARCamera();
-  debugWarpTreasure(5);
-  state.chestPlaced = true;
-  setPhase("ar_scan");
-  updateARView();
-  flash("Debug: chest forced into place zone");
-}
-
-async function debugSkipTo(target) {
-  if (!DEBUG_MOVE) return;
-  if (!state.playing) return;
-
-  if (target === "ar" || target === "open" || target === "selfie" || target === "claim") {
-    debugWarpTreasure(5);
-    state.arUserOpened = true;
-    await openARCamera();
-  }
-  if (target === "open" || target === "selfie" || target === "claim") {
-    state.chestPlaced = true;
-    openTreasureChest();
-  }
-  if (target === "selfie" || target === "claim") {
-    await startVictorySelfie();
-  }
-  if (target === "claim") {
-    if (!state.selfieDataUrl) state.selfieDataUrl = makeDebugSelfiePlaceholder();
-    useSelfieAndClaim();
-  }
+  flash(`Warped on map · ~${meters} m from treasure`);
+  updateDebugPanel();
 }
 
 /* =========================================================================
@@ -2923,11 +2914,6 @@ function beginPlay() {
   updateBackgroundStatus();
   updateHotZoneCta();
   updateDebugPanel();
-
-  // Optional URL skip for QA: ?debug=1&near=1&skip=selfie
-  if (DEBUG_SKIP) {
-    setTimeout(() => debugSkipTo(DEBUG_SKIP), 400);
-  }
 }
 
 function finish(quit) {
@@ -3357,22 +3343,10 @@ dom.btnSelfieUse.addEventListener("click", useSelfieAndClaim);
 dom.btnClaimShare.addEventListener("click", shareToClaim);
 
 if (DEBUG_MOVE) {
-  el("dbg-warp-15").addEventListener("click", () => debugWarpTreasure(15));
-  el("dbg-warp-5").addEventListener("click", () => debugWarpTreasure(5));
-  el("dbg-open-ar").addEventListener("click", () => {
-    unlockDetectorAudio(false);
-    if (state.nearest.id !== -1 && ftToM(state.nearest.distance) > AR_RANGE_M) {
-      debugWarpTreasure(15);
-    }
-    openARCamera();
-  });
-  el("dbg-force-place").addEventListener("click", debugForcePlace);
-  el("dbg-open-chest").addEventListener("click", () => {
-    state.chestPlaced = true;
-    openTreasureChest();
-  });
-  el("dbg-selfie").addEventListener("click", () => debugSkipTo("selfie"));
-  el("dbg-claim").addEventListener("click", () => debugSkipTo("claim"));
+  el("dbg-warp-40").addEventListener("click", () => debugWarpPlayerToDistance(40));
+  el("dbg-warp-20").addEventListener("click", () => debugWarpPlayerToDistance(20));
+  el("dbg-warp-10").addEventListener("click", () => debugWarpPlayerToDistance(10));
+  el("dbg-warp-5").addEventListener("click", () => debugWarpPlayerToDistance(5));
   dom.debugPanel.classList.remove("hidden");
   updateDebugPanel();
 }
@@ -3383,16 +3357,15 @@ window.addEventListener("resize", resizeFx);
 const maxSpawnRadius = Math.max(MIN_RADIUS + 1, ROOM_SIZE_FT / 2 - 5);
 const spaceNeeded = Math.ceil((maxSpawnRadius * 2) / 10) * 10;
 el("tagline").innerHTML =
-  `Find the hidden treasure with live distance + metal detector.<br />` +
-  `≤20&nbsp;m → Open AR → tap chest → victory selfie → claim.<br />` +
+  `${BOX_COUNT} treasures are hidden nearby — live distance + metal detector.<br />` +
+  `≤20&nbsp;m → Open AR → tap chest (×${BOX_COUNT}) → victory selfie → claim.<br />` +
   `<span style="color:#64748b">Needs roughly ${spaceNeeded} ft of open outdoor space.</span>`;
 
 if (DEBUG_MOVE) {
   el("tagline").innerHTML +=
-    `<br /><span style="color:#fbbf24">Sandbox ON — D-pad/WASD + yellow Debug QA panel.` +
-    `${DEBUG_NEAR ? " near=1 (~8–18 m)." : ""}` +
-    `${Number.isFinite(DEBUG_AT_M) ? ` at=${DEBUG_AT_M}m.` : ""}` +
-    `${DEBUG_SKIP ? ` skip=${DEBUG_SKIP}.` : ""}</span>`;
+    `<br /><span style="color:#fbbf24">Sandbox: no GPS — WASD / arrows or D-pad to walk on the map. Yellow card warps your map distance.` +
+    `${DEBUG_NEAR ? " near=1 (~8–18 m spawn)." : ""}` +
+    `${Number.isFinite(DEBUG_AT_M) ? ` at=${DEBUG_AT_M}m.` : ""}</span>`;
 }
 
 const secureWarn = el("secure-warn");

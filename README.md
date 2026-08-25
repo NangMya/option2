@@ -4,11 +4,11 @@ A prototype outdoor AR treasure hunt in a single `index.html` (no build step).
 
 **Live flow**
 
-1. Real-time distance on radar + metal-detector audio  
+1. Real-time distance on radar + metal-detector audio (nearest of **3** treasures)  
 2. At **≤ 20 m** — higher-pitched detector + **Open AR Camera** CTA  
 3. User opens AR, scans surroundings  
 4. At **≤ 10 m** (place geofence) — animated treasure chest appears on the ground plane  
-5. Tap chest to open → **Take Victory Selfie**  
+5. Tap chest to open → repeat until all **3** are opened → **Take Victory Selfie**  
 6. Form: **Name** + **Phone** → **Share to Claim**
 
 **Movement is GPS-only** in real play. Shake does nothing. Compass only sets facing.
@@ -26,40 +26,32 @@ A prototype outdoor AR treasure hunt in a single `index.html` (no build step).
 
 ## Sandbox / debug mode
 
+No real GPS. You move on the radar map with **WASD / arrow keys** (PC) or the on-screen **▲◀▼▶** pad. The yellow **Warp to map** card teleports you to a set distance from the treasure.
+
 ```
 https://your-domain.com/index.html?debug=1&near=1
 ```
 
 | Flag | What it does |
 | --- | --- |
-| `?debug=1` | No GPS — **WASD** / arrows (PC) or on-screen **▲◀▼▶** pad; shows **Debug QA** panel |
-| `&near=1` | Treasure spawns **~8–18 m** away (quick hot-zone reach) |
-| `&at=15` | Spawn treasure exactly **N meters** ahead (e.g. `at=5` for place zone) |
-| `&skip=ar` | After GO!, jump toward AR (also: `open`, `selfie`, `claim`) |
+| `?debug=1` | No GPS — keyboard / D-pad movement + **Warp to map** card |
+| `&near=1` | Treasure spawns **~8–18 m** away |
+| `&at=15` | Spawn treasure exactly **N meters** ahead |
 
-### Debug QA panel (yellow, bottom-right)
+### Warp to map card
 
-| Button | Action |
+| Button | Teleports you on the radar to… |
 | --- | --- |
-| **Warp · 15 m** | Put treasure ~15 m ahead (hot zone / Open AR) |
-| **Warp · 5 m** | Put treasure ~5 m ahead (place geofence) |
-| **Open AR** | Same as the in-game CTA |
-| **Force place chest** | Open AR + warp to place zone |
-| **Open chest** | Trigger open animation + Victory Selfie CTA |
-| **→ Selfie** | Jump to victory selfie stage |
-| **→ Claim** | Jump to Name / Phone / Share to Claim |
+| **Far · 40 m** | ~40 m from treasure (cold / quiet detector) |
+| **Hot · 20 m** | ~20 m — metal detector + **Open AR Camera** |
+| **Place · 10 m** | ~10 m — chest can place in AR |
+| **Near · 5 m** | ~5 m — close place / flash zone |
 
-### Seated full-flow QA (recommended)
+Then keep walking with WASD / pad, or open AR when the CTA appears.
 
-1. Open `index.html?debug=1&near=1` (HTTPS or localhost for camera).  
-2. Tap **PLAY** → countdown → detector may already beep if spawn is ≤20 m.  
-3. Tap **Open AR Camera** (or Debug → Open AR).  
-4. **Warp · 5 m** (or walk with ▲) until chest appears → tap chest.  
-5. **Take Victory Selfie** → Capture / Use → fill Name + Phone → **Share to Claim**.
+**Seated test:** PLAY → Warp **Hot · 20 m** → hear detector → **Open AR Camera** → Warp **Place · 10 m** → tap chest → selfie → claim.
 
-**Fastest smoke test:** `?debug=1&near=1&skip=claim` jumps to the claim form after GO!
-
-Radar + detector work from a local file in debug mode. **Camera** still needs HTTPS / localhost on most browsers; debug continues with placeholders if camera is denied.
+Radar + detector work from a local file in debug mode. **Camera** still needs HTTPS / localhost on most browsers.
 
 ---
 
