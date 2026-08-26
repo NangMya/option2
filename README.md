@@ -6,10 +6,12 @@ A prototype outdoor AR treasure hunt in a single `index.html` (no build step).
 
 1. Real-time distance on radar + metal-detector audio (nearest of **3** treasures)  
 2. Crates are **hidden on the map** — only dots on the **minimap** + distance/bearing  
-3. At **≤ 20 m** — detector + **Open AR Camera** (treasure appears only in camera)  
-4. Perspective box in AR — tap at **≤ 10 m** to open; repeat for all **3**  
-5. **Victory Selfie**: real you + AR treasure box  
+3. At **≤ 20 m** — detector + **Open AR Camera**  
+4. **Pokemon GO-style AR:** pan to find the chest in the world (compass-aim); it scales with distance; **OPEN CHEST** when ≤10 m and aimed  
+5. Repeat for all **3** → **Victory Selfie** (you + box)  
 6. Form: **Name** + **Phone** → **Share to Claim**
+
+Camera streams stay warm when returning to radar (reduces intermittent “camera blocked” on mobile).
 
 **Movement is GPS-only** in real play. Shake does nothing. Compass only sets facing.
 
