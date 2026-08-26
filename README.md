@@ -6,12 +6,12 @@ A prototype outdoor AR treasure hunt in a single `index.html` (no build step).
 
 1. Real-time distance on radar + metal-detector audio (nearest of **3** treasures)  
 2. Crates are **hidden on the map** — only dots on the **minimap** + distance/bearing  
-3. At **≤ 20 m** — detector + **Open AR Camera**  
-4. **Pokemon GO-style AR:** pan to find the chest in the world (compass-aim); it scales with distance; **OPEN CHEST** when ≤10 m and aimed  
+3. At **≤ 15 m** — detector + **Open AR Camera**  
+4. **Pokemon GO-style AR:** pan to find the chest; **OPEN CHEST** when ≤8 m and aimed  
 5. Repeat for all **3** → **Victory Selfie** (you + box)  
 6. Form: **Name** + **Phone** → **Share to Claim**
 
-Camera streams stay warm when returning to radar (reduces intermittent “camera blocked” on mobile).
+Outdoor field ≈ **140 ft** (~43 m); treasures spawn from ~**55 ft** (~17 m). Camera streams stay warm when returning to radar.
 
 **Movement is GPS-only** in real play. Shake does nothing. Compass only sets facing.
 
@@ -50,7 +50,7 @@ https://your-site/index.html?debug=1&near=1
 | `&near=1` | Treasures spawn **~8–18 m** away |
 | `&at=15` | Spawn treasures around **N meters** ahead |
 
-**Seated test:** PLAY → walk with pad toward the yellow arc → ≤20 m detector + **Open AR Camera** → ≤10 m tap chest → repeat for all **3** → **Take Victory Selfie** → claim.
+**Seated test:** PLAY → walk with pad toward the yellow arc → ≤15 m detector + **Open AR Camera** → ≤8 m open chest → repeat for all **3** → **Take Victory Selfie** → claim.
 
 ---
 
@@ -58,7 +58,7 @@ https://your-site/index.html?debug=1&near=1
 
 1. Deploy / push to your HTTPS host (GitHub Pages, etc.).  
 2. On the phone, open that `https://…` URL (not `file://`, not a tunnel URL).  
-3. Tap **PLAY** → allow Location → walk until ≤20 m → Open AR → place zone → open chest → selfie → claim.
+3. Tap **PLAY** → allow Location → walk until ≤15 m → Open AR → ≤8 m open chest → selfie → claim.
 
 ### If you see “Location permission denied”
 
@@ -74,9 +74,10 @@ https://your-site/index.html?debug=1&near=1
 
 | Zone | Distance | Behavior |
 | --- | --- | --- |
-| Cold | > 20 m | Distance HUD; detector quiet |
-| Hot | ≤ 20 m | Faster / higher beeps + **Open AR Camera** |
-| Place | ≤ 10 m (while AR open) | Chest placed in camera view |
+| Cold | > 15 m | Distance HUD; detector quiet |
+| Hot | ≤ 15 m | Faster / higher beeps + **Open AR Camera** |
+| Place | ≤ 8 m (while AR open) | Aim + **OPEN CHEST** |
+| Flash | ≤ 6 m | Corner strobes + vibrate (when screen on) |
 | Flash | ≤ 8 m | Corner strobes + vibrate (when screen on) |
 
 AR does **not** auto-open; the player must tap **Open AR Camera**. **← RADAR** exits AR (chest re-places when you open AR again in range).
@@ -93,7 +94,7 @@ Detector keep-alive: Web Audio + HTML5 loop + Media Session + optional Wake Lock
 | --- | --- |
 | Walking (GPS) | Moves you on the radar 1:1 |
 | Compass | Facing only |
-| **Open AR Camera** | Manual AR entry at ≤20 m |
+| **Open AR Camera** | Manual AR entry at ≤15 m |
 | Tap AR chest | Open treasure (in place zone) |
 | Victory Selfie / Claim | End loop |
 | `?debug=1` pad / WASD | Seated movement |

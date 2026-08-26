@@ -1103,7 +1103,7 @@
   <button id="btn-open-ar" type="button" class="hidden">📷 Open AR Camera</button>
 </div>
 
-<!-- AR discovery view (manual — Open AR Camera when ≤20 m) -->
+<!-- AR discovery view (manual — Open AR Camera when in hot zone) -->
 <div id="ar-layer" class="hidden">
   <video id="ar-video" playsinline autoplay muted></video>
   <div id="ar-radar-fade"></div>
@@ -1207,9 +1207,9 @@
   <div class="dbg-title">Warp to map</div>
   <div id="debug-phase" class="dbg-phase">dist — · WASD / ▲◀▼▶</div>
   <div class="dbg-btns">
-    <button type="button" id="dbg-warp-40" title="Teleport on map ~40 m from treasure">Far · 40 m</button>
-    <button type="button" id="dbg-warp-20" title="Teleport on map ~20 m (hot zone)">Hot · 20 m</button>
-    <button type="button" id="dbg-warp-10" title="Teleport on map ~10 m (place zone)">Place · 10 m</button>
+    <button type="button" id="dbg-warp-40" title="Teleport on map ~30 m from treasure">Far · 30 m</button>
+    <button type="button" id="dbg-warp-20" title="Teleport on map ~15 m (hot zone)">Hot · 15 m</button>
+    <button type="button" id="dbg-warp-10" title="Teleport on map ~8 m (place zone)">Place · 8 m</button>
     <button type="button" id="dbg-warp-5" title="Teleport on map ~5 m">Near · 5 m</button>
   </div>
 </div>
@@ -1227,12 +1227,12 @@
 // never moves the player. `pickupRange` must be generous because phone GPS
 // typically jitters ±15–40 ft outdoors.
 const PRESETS = {
-  // Crates spawn beyond 20 m so the alarm stays quiet until you walk in.
-  // 70–95 ft ≈ 21–29 m from start.
-  outdoor: { roomSize: 200, pixelScale: 12, pickupRange: 25, minRadius: 70 },
+  // Tighter outdoor hunt — treasures spawn just outside the AR unlock ring.
+  // 55 ft ≈ 16.8 m (> 15 m hot zone).
+  outdoor: { roomSize: 140, pixelScale: 14, pickupRange: 22, minRadius: 55 },
 
-  // Smaller field — still starts outside the 20 m alert ring when possible.
-  compact: { roomSize: 120, pixelScale: 18, pickupRange: 20, minRadius: 70 },
+  // Even smaller field for tight sites.
+  compact: { roomSize: 100, pixelScale: 16, pickupRange: 20, minRadius: 50 },
 };
 
 const PRESET = PRESETS.outdoor;
@@ -1256,11 +1256,11 @@ const DIST_DISPLAY_SMOOTH = 0.35;    // blend when accepting a real distance cha
 
 // Metal detector + AR ranges (real-world meters)
 const M_PER_FT = 1 / FT_PER_M;
-const AR_RANGE_M = 20;            // hot zone + Open AR CTA
+const AR_RANGE_M = 15;            // hot zone + Open AR CTA
 const AR_RANGE_FT = AR_RANGE_M * FT_PER_M;
-const FLASH_RANGE_M = 8;
+const FLASH_RANGE_M = 6;
 const FLASH_RANGE_FT = FLASH_RANGE_M * FT_PER_M;
-const PLACE_RANGE_M = 10;         // catch / open range
+const PLACE_RANGE_M = 8;          // catch / open range
 const PLACE_RANGE_FT = PLACE_RANGE_M * FT_PER_M;
 const AR_FOV_HALF_DEG = 58;       // Pokemon GO-style visible cone (±)
 const AR_CATCH_AIM_DEG = 42;      // must roughly face chest to open
@@ -1671,7 +1671,7 @@ function formatDistanceM(ft) {
       while a media session is active
    ========================================================================= */
 
-const PROX_ALERT_M = 20; // detector alarm only at ≤ 20 m
+const PROX_ALERT_M = AR_RANGE_M; // detector alarm only inside hot zone
 
 function haversineMeters(lat1, lng1, lat2, lng2) {
   const R = 6371000;
@@ -1923,7 +1923,7 @@ function intensityForDistanceM(distM) {
 
 function zoneForDistanceM(distM) {
   if (!isFinite(distM)) return "far";
-  if (distM <= 8) return "hot";
+  if (distM <= FLASH_RANGE_M) return "hot";
   if (distM <= PROX_ALERT_M) return "near";
   return "far";
 }
@@ -1970,7 +1970,7 @@ function pumpBeepScheduler() {
     detector.nextBeepTime += interval;
   }
 
-  if (!document.hidden && distM <= 8 && navigator.vibrate) {
+  if (!document.hidden && distM <= FLASH_RANGE_M && navigator.vibrate) {
     try {
       navigator.vibrate([500, 200, 500]);
     } catch { /* ignore */ }
@@ -2126,9 +2126,9 @@ function updateProximityUI() {
     dom.detectorDistance.classList.toggle("hot", detector.zone === "hot");
   }
   if (dom.detectorSignal) {
-    if (detector.zone === "hot") dom.detectorSignal.textContent = "ALARM · < 8 m";
-    else if (detector.zone === "near") dom.detectorSignal.textContent = "SIGNAL · ≤ 20 m";
-    else dom.detectorSignal.textContent = "QUIET · > 20 m (no alarm)";
+    if (detector.zone === "hot") dom.detectorSignal.textContent = `ALARM · < ${FLASH_RANGE_M} m`;
+    else if (detector.zone === "near") dom.detectorSignal.textContent = `SIGNAL · ≤ ${AR_RANGE_M} m`;
+    else dom.detectorSignal.textContent = `QUIET · > ${AR_RANGE_M} m (no alarm)`;
   }
 }
 
@@ -2274,7 +2274,7 @@ function stopARCamera() {
 async function openARCamera() {
   if (!state.playing || state.finished || state.inventory.length >= BOX_COUNT) return;
   if (state.nearest.id === -1 || ftToM(state.nearest.distance) > AR_RANGE_M) {
-    flash("Get within 20 m first.");
+    flash(`Get within ${AR_RANGE_M} m first.`);
     return;
   }
 
@@ -2494,7 +2494,7 @@ function openTreasureChest() {
   const canOpen = (inPlace && aimed) || state.chestPlaced || (DEBUG_MOVE && inPlace);
 
   if (!canOpen) {
-    if (!inPlace) flash("Walk closer — within 10 m to open.");
+    if (!inPlace) flash(`Walk closer — within ${PLACE_RANGE_M} m to open.`);
     else flash("Aim at the chest, then open.");
     return;
   }
@@ -3678,7 +3678,7 @@ const maxSpawnRadius = Math.max(MIN_RADIUS + 1, ROOM_SIZE_FT / 2 - 5);
 const spaceNeeded = Math.ceil((maxSpawnRadius * 2) / 10) * 10;
 el("tagline").innerHTML =
   `${BOX_COUNT} hidden treasures — radar distance + minimap only.<br />` +
-  `≤20&nbsp;m → <b>Open AR Camera</b> to reveal &amp; open each chest → selfie → claim.<br />` +
+  `≤${AR_RANGE_M}&nbsp;m → <b>Open AR Camera</b> · open at ≤${PLACE_RANGE_M}&nbsp;m → selfie → claim.<br />` +
   `<span style="color:#64748b">Needs roughly ${spaceNeeded} ft of open outdoor space.</span>`;
 
 if (DEBUG_MOVE) {
