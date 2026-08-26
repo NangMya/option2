@@ -1039,7 +1039,7 @@
     <h1>Treasure Radar 📡</h1>
     <p id="tagline" class="tagline"></p>
 
-    <button id="btn-play" class="btn-primary">PLAY 3</button>
+    <button id="btn-play" class="btn-primary">PLAY 4</button>
 
     <p id="best-score" class="best-score hidden"></p>
 
@@ -1249,8 +1249,10 @@ const GRID_FT = Math.max(1, Math.round(100 / PIXEL_SCALE));
 // GPS filters — reject jitter and bad fixes.
 const FT_PER_M = 3.280839895;
 const GPS_MAX_ACCURACY_FT = 50;   // ignore fixes worse than this
-const GPS_MIN_MOVE_FT = 3;        // ignore tiny GPS noise hops
+const GPS_MIN_MOVE_FT = 5;        // ignore GPS noise hops under ~1.5 m (stand-still)
 const GPS_FIX_TIMEOUT_MS = 20000;
+const DIST_DISPLAY_DEADBAND_M = 0.8; // hold HUD meters unless change exceeds this
+const DIST_DISPLAY_SMOOTH = 0.35;    // blend when accepting a real distance change
 
 // Metal detector + AR ranges (real-world meters)
 const M_PER_FT = 1 / FT_PER_M;
@@ -1317,6 +1319,7 @@ const detector = {
   unlocked: false,
   running: false,
   lastDistM: Infinity,
+  displayDistM: null,   // smoothed HUD distance (live GPS anti-jitter)
   zone: "far",          // far | near | hot
   // Web Audio — beeps scheduled on the audio clock
   ctx: null,
@@ -1621,7 +1624,11 @@ function render() {
   dom.targetArc.style.opacity = state.nearest.id === -1 ? "0" : "1";
 
   dom.distance.textContent =
-    state.nearest.id === -1 ? "---" : formatDistanceM(state.nearest.distance);
+    state.nearest.id === -1
+      ? "---"
+      : (detector.displayDistM != null && isFinite(detector.displayDistM)
+          ? formatDistanceLabel(detector.displayDistM)
+          : formatDistanceM(state.nearest.distance));
 
   for (const box of state.boxes) {
     if (box.dot) {
@@ -1973,6 +1980,7 @@ function pumpBeepScheduler() {
 function startProximityDetector() {
   detector.running = true;
   detector.nextBeepTime = 0;
+  detector.displayDistM = null;
   detector.lastDistM = state.nearest.id === -1 ? Infinity : ftToM(state.nearest.distance);
   setAlarmEnabled(detector.lastDistM <= PROX_ALERT_M);
 
@@ -2031,6 +2039,31 @@ function playDetectorBeep(intensity) {
   }
 }
 
+function formatDistanceLabel(distM) {
+  if (!isFinite(distM)) return "--- m";
+  return distM >= 100 ? `${Math.round(distM)} m` : `${distM.toFixed(1)} m`;
+}
+
+/** Hold / smooth live GPS distance so the HUD does not flicker while standing still. */
+function stabilizeDistanceM(rawM) {
+  if (!isFinite(rawM)) return rawM;
+  if (DEBUG_MOVE) {
+    detector.displayDistM = rawM;
+    return rawM;
+  }
+  if (detector.displayDistM == null || !isFinite(detector.displayDistM)) {
+    detector.displayDistM = rawM;
+    return rawM;
+  }
+  const delta = Math.abs(rawM - detector.displayDistM);
+  if (delta < DIST_DISPLAY_DEADBAND_M) {
+    return detector.displayDistM;
+  }
+  detector.displayDistM =
+    detector.displayDistM * (1 - DIST_DISPLAY_SMOOTH) + rawM * DIST_DISPLAY_SMOOTH;
+  return detector.displayDistM;
+}
+
 function updateProximityFromDistanceM(distM) {
   detector.lastDistM = distM;
   const zone = zoneForDistanceM(distM);
@@ -2051,16 +2084,17 @@ function updateProximityUI() {
   if (!state.playing || state.nearest.id === -1) {
     dom.distance.textContent = "---";
     if (dom.stripDistance) dom.stripDistance.textContent = "--- m";
+    detector.displayDistM = null;
     return;
   }
 
-  // Prefer Haversine when we have real GPS origin + target lat/lng.
-  let distM = ftToM(state.nearest.distance);
+  // Live: distance from last *stable* GPS fix (not every noisy sample).
+  let rawM = ftToM(state.nearest.distance);
   const box = state.boxes.find((b) => b.id === state.nearest.id);
   if (!DEBUG_MOVE && gps.origin && box && gps.lastAccepted) {
     const target = feetOffsetToLatLng(box.x, box.y);
     if (target) {
-      distM = haversineMeters(
+      rawM = haversineMeters(
         gps.lastAccepted.lat,
         gps.lastAccepted.lng,
         target.lat,
@@ -2069,6 +2103,7 @@ function updateProximityUI() {
     }
   }
 
+  const distM = stabilizeDistanceM(rawM);
   updateProximityFromDistanceM(distM);
 
   const inRange = distM <= PROX_ALERT_M;
@@ -2076,7 +2111,7 @@ function updateProximityUI() {
     ? Math.max(0.15, 1 - distM / PROX_ALERT_M)
     : 0;
 
-  const label = distM >= 100 ? `${Math.round(distM)} m` : `${distM.toFixed(1)} m`;
+  const label = formatDistanceLabel(distM);
   dom.distance.textContent = label;
   dom.distance.style.color = inRange ? "var(--gold)" : "";
 
@@ -3145,6 +3180,8 @@ function resetRun() {
   state.gpsAccuracyFt = null;
   gps.origin = null;
   gps.lastAccepted = null;
+  detector.displayDistM = null;
+  detector.lastDistM = Infinity;
 
   if (dom.overlaySelfie) dom.overlaySelfie.classList.add("hidden");
   if (dom.overlayClaim) dom.overlayClaim.classList.add("hidden");
@@ -3293,7 +3330,6 @@ function onGpsUpdate(position) {
   if (document.hidden) {
     gps.hiddenUpdates++;
     updateBackgroundStatus();
-    // Critical: refresh media pipeline on every background GPS fix.
     startBackgroundKeepAlive();
   }
 
@@ -3303,7 +3339,6 @@ function onGpsUpdate(position) {
 
   if (accuracyFt > GPS_MAX_ACCURACY_FT) {
     setGpsStatus(`GPS · weak ±${Math.round(accuracyFt)} ft`);
-    // Still keep hunting audio going with last known distance.
     pumpBeepScheduler();
     return;
   }
@@ -3314,6 +3349,7 @@ function onGpsUpdate(position) {
     state.gpsReady = true;
     state.pos = { x: ROOM_SIZE_FT / 2, y: ROOM_SIZE_FT / 2 };
     setGpsStatus(`GPS · locked ±${Math.round(accuracyFt)} ft`);
+    detector.displayDistM = null;
     render();
     pumpBeepScheduler();
     return;
@@ -3322,37 +3358,48 @@ function onGpsUpdate(position) {
   if (!document.hidden) setGpsStatus(`GPS · ±${Math.round(accuracyFt)} ft`);
 
   if (!state.playing) {
-    gps.lastAccepted = { lat, lng };
+    // Pre-play: keep a stable lock, ignore micro-jitter.
+    const prevWarm = gps.lastAccepted || { lat, lng };
+    const warmHop = hopFeetBetween(prevWarm, { lat, lng });
+    if (warmHop >= GPS_MIN_MOVE_FT) gps.lastAccepted = { lat, lng };
     return;
   }
 
-  // Always refresh lastAccepted for Haversine proximity (even tiny GPS hops).
   const prev = gps.lastAccepted || { lat, lng };
+  const hopFt = hopFeetBetween(prev, { lat, lng });
+
+  // Standing still: do NOT move lastAccepted or refresh distance (stops HUD flicker).
+  if (hopFt < GPS_MIN_MOVE_FT) {
+    pumpBeepScheduler();
+    updateBackgroundStatus();
+    return;
+  }
+
   const mPerDegLat = 111320;
   const mPerDegLng = 111320 * Math.cos((prev.lat * Math.PI) / 180);
   const dEast = (lng - prev.lng) * mPerDegLng * FT_PER_M;
   const dNorth = (lat - prev.lat) * mPerDegLat * FT_PER_M;
-  const hopFt = Math.hypot(dEast, dNorth);
 
   gps.lastAccepted = { lat, lng };
 
-  // Move the virtual avatar only on meaningful hops (anti-jitter).
-  if (hopFt >= GPS_MIN_MOVE_FT) {
-    const from = { ...state.pos };
-    const next = latLngToFeetOffset(lat, lng);
-    if (!state.compassEnabled) {
-      state.heading = Math.atan2(dEast, dNorth);
-    }
-    applyPosition(next.x, next.y, { countWalk: true, from });
-    if (hopFt >= 6 && !document.hidden) buzz(25);
-  } else {
-    // No avatar move — still refresh nearest distance / alarm rate.
-    updateNearest();
-    updateProximityUI();
+  const from = { ...state.pos };
+  const next = latLngToFeetOffset(lat, lng);
+  if (!state.compassEnabled) {
+    state.heading = Math.atan2(dEast, dNorth);
   }
+  applyPosition(next.x, next.y, { countWalk: true, from });
+  if (hopFt >= 6 && !document.hidden) buzz(25);
 
   pumpBeepScheduler();
   updateBackgroundStatus();
+}
+
+function hopFeetBetween(a, b) {
+  const mPerDegLat = 111320;
+  const mPerDegLng = 111320 * Math.cos((a.lat * Math.PI) / 180);
+  const dEast = (b.lng - a.lng) * mPerDegLng * FT_PER_M;
+  const dNorth = (b.lat - a.lat) * mPerDegLat * FT_PER_M;
+  return Math.hypot(dEast, dNorth);
 }
 
 /* =========================================================================
