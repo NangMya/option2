@@ -5,16 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#000000" />
 <meta http-equiv="Permissions-Policy" content="geolocation=(self), gyroscope=(self), accelerometer=(self), camera=(self)" />
-<title>Treasure Radar</title>
+<title>Coffee Mix Treasure Hunt</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>📦</text></svg>" />
 <style>
   :root {
-    --bg: #000000;
-    --panel: #18181b;
-    --panel-2: #27272a;
+    --bg: #0c0704;
+    --panel: #1a120c;
+    --panel-2: #2a1f14;
     --line: rgba(255, 255, 255, 0.1);
-    --muted: #71717a;
-    --gold: #fbbf24;
+    --muted: #a89078;
+    --gold: #d4a056;
+    --coffee: #6f4e37;
+    --cream: #f5e6d3;
     --blue: #2563eb;
     --red: #dc2626;
     --green: #22c55e;
@@ -58,14 +60,14 @@
     align-items: center;
     justify-content: center;
     padding: 20px;
-    background: radial-gradient(circle at 50% 30%, #1e293b 0%, #020617 70%);
+    background: radial-gradient(circle at 50% 30%, #2a1a0e 0%, #0c0704 70%);
   }
 
   .card {
     width: 100%;
     max-width: 360px;
-    background: #1e293b;
-    border: 1px solid #334155;
+    background: #1a120c;
+    border: 1px solid #4a3528;
     border-radius: 24px;
     padding: 28px 28px 24px;
     text-align: center;
@@ -529,9 +531,19 @@
     transition: filter 0.2s;
   }
 
+  #ar-target-wrap.placed #ar-target,
+  #ar-target-wrap.ar-world:not(.opened) #ar-target {
+    animation: chest-idle 2.4s ease-in-out infinite;
+  }
+
   #ar-target-wrap.catchable #ar-target {
-    filter: drop-shadow(0 0 48px rgba(34, 197, 94, 0.95)) drop-shadow(0 0 20px rgba(251, 191, 36, 0.8));
+    filter: drop-shadow(0 0 48px rgba(34, 197, 94, 0.95)) drop-shadow(0 0 20px rgba(212, 160, 86, 0.8));
     animation: catch-bob 1.1s ease-in-out infinite;
+  }
+
+  @keyframes chest-idle {
+    0%, 100% { transform: translateY(0) rotateX(8deg); }
+    50% { transform: translateY(-6px) rotateX(12deg); }
   }
 
   @keyframes catch-bob {
@@ -970,6 +982,101 @@
 
   .claim-card input:focus { border-color: var(--gold); }
 
+  .debug-link-box {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(111, 78, 55, 0.25);
+    border: 1px solid rgba(212, 160, 86, 0.35);
+    text-align: left;
+  }
+
+  .debug-link-box code {
+    display: block;
+    font-size: 10px;
+    color: var(--cream);
+    word-break: break-all;
+    margin: 8px 0;
+    line-height: 1.5;
+  }
+
+  .btn-copy-debug {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    background: var(--panel-2);
+    border: 1px solid #4a3528;
+    color: var(--cream);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .social-card {
+    width: min(400px, 94vw);
+    max-height: 92vh;
+    overflow-y: auto;
+    background: #1a120c;
+    border: 1px solid #4a3528;
+    border-radius: 20px;
+    padding: 22px;
+    text-align: center;
+  }
+
+  .social-card h2 {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    color: var(--cream);
+  }
+
+  .social-card .sub {
+    font-size: 12px;
+    color: #a89078;
+    line-height: 1.55;
+    margin-bottom: 14px;
+  }
+
+  #social-card-preview {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border: 2px solid rgba(212, 160, 86, 0.4);
+  }
+
+  #social-code-display {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+  }
+
+  .social-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .social-actions button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 14px;
+  }
+
+  .btn-social-fb { background: #1877f2; color: #fff; }
+  .btn-social-ig { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743); color: #fff; }
+  .btn-social-comment { background: var(--coffee); color: var(--cream); }
+  .btn-social-done { background: var(--gold); color: #000; }
+
+  #result-code {
+    font-size: 14px;
+    color: var(--gold);
+    margin-top: 8px;
+    letter-spacing: 0.06em;
+  }
+
   #claim-thumb {
     width: 88px;
     height: 88px;
@@ -1036,16 +1143,21 @@
 <!-- ============ START SCREEN ============ -->
 <div id="screen-start">
   <div class="card">
-    <h1>Treasure Radar 📡</h1>
+    <h1>Coffee Mix ☕</h1>
     <p id="tagline" class="tagline"></p>
 
-    <button id="btn-play" class="btn-primary">PLAY 5</button>
+    <button id="btn-play" class="btn-primary">START HUNT</button>
 
     <p id="best-score" class="best-score hidden"></p>
 
     <div class="hint">
-      <b>Hunt:</b> radar + minimap + detector guide you — crates stay <b>hidden</b> until <b>Open AR Camera</b>. Open all <b>3</b> → selfie → claim.<br />
-      <b>Sandbox:</b> <code>?debug=1&amp;near=1</code> — WASD / arrows / D-pad (no GPS).
+      <b>Weekly hunt:</b> radar + detector guide you to the hidden treasure. At <b>≤ 20 m</b>, tap <b>Open AR Camera</b>, find the chest, open it, take a victory selfie, then share to claim.<br />
+      <b>Prizes:</b> fastest finder wins the weekly grand prize; next 50 finders get coffee gift sets.
+    </div>
+    <div id="debug-link-box" class="debug-link-box">
+      <p class="label">QA debug test link</p>
+      <code id="debug-link-url"></code>
+      <button id="btn-copy-debug" type="button" class="btn-copy-debug">Copy test link</button>
     </div>
     <div id="secure-warn" class="warn-box hidden"></div>
   </div>
@@ -1066,12 +1178,12 @@
     </div>
   </div>
 
-  <button id="btn-bag" class="hud round-btn">
+  <button id="btn-bag" class="hud round-btn hidden">
     🎁<span id="bag-count" class="hidden">0</span>
   </button>
 
   <div id="hud-top" class="hud">
-    <p class="label">Target</p>
+    <p class="label">Weekly treasure</p>
     <div id="distance" class="mono">---</div>
     <p id="message"></p>
     <div id="hud-stats">
@@ -1153,11 +1265,11 @@
 
 <div id="overlay-selfie" class="overlay hidden">
   <div style="display:flex;flex-direction:column;align-items:center">
-    <p class="label" style="margin-bottom:10px;color:#fbbf24">Victory Selfie · you + treasure</p>
+    <p class="label" style="margin-bottom:10px;color:var(--gold)">Victory Selfie · you + Coffee Mix treasure</p>
     <div id="selfie-stage">
       <video id="selfie-video" playsinline autoplay muted></video>
       <div id="selfie-ar-box" aria-hidden="true">📦</div>
-      <div id="selfie-caption">TREASURE IN FRAME · REAL YOU</div>
+      <div id="selfie-caption">COFFEE MIX · TREASURE FOUND</div>
       <img id="selfie-preview" class="hidden" alt="Selfie preview" />
       <div id="selfie-countdown" class="hidden"></div>
     </div>
@@ -1172,7 +1284,7 @@
 <div id="overlay-claim" class="overlay hidden">
   <div class="claim-card">
     <h2>Share to Claim</h2>
-    <p class="sub">Enter your details to claim your treasure win.</p>
+    <p class="sub">Enter your details. Fastest finder wins the weekly prize; next 50 get coffee gift sets.</p>
     <img id="claim-thumb" class="hidden" alt="" />
     <label for="claim-name">Name</label>
     <input id="claim-name" type="text" placeholder="Your name" maxlength="40" autocomplete="name" />
@@ -1184,11 +1296,29 @@
   </div>
 </div>
 
+<div id="overlay-social" class="overlay hidden">
+  <div class="social-card">
+    <h2>Post to Enter</h2>
+    <p class="sub">Save your card, post it publicly on Facebook or Instagram, then comment your verification code on the official weekly post.</p>
+    <img id="social-card-preview" alt="Branded share card" />
+    <p id="social-code-display" class="mono"></p>
+    <div class="social-actions">
+      <button id="btn-save-card" type="button" class="btn-save">Save Image</button>
+      <button id="btn-share-fb" type="button" class="btn-social-fb">Share on Facebook</button>
+      <button id="btn-share-ig" type="button" class="btn-social-ig">Instagram Instructions</button>
+      <button id="btn-comment-post" type="button" class="btn-social-comment">Comment on Official Post</button>
+      <button id="btn-social-done" type="button" class="btn-social-done">Done — Mission Complete</button>
+    </div>
+    <p id="social-instructions" class="sub"></p>
+  </div>
+</div>
+
 <div id="overlay-result" class="overlay hidden">
   <div id="result-card">
     <div id="result-title">MISSION COMPLETE</div>
     <div id="result-name">player</div>
     <div id="result-boxes"></div>
+    <p id="result-code" class="mono hidden"></p>
     <div id="result-stats">
       <div><div class="label">Time</div><div id="result-time" class="v mono">0:00</div></div>
       <div><div class="label">Walked</div><div id="result-walked" class="v mono">0</div></div>
@@ -1208,7 +1338,7 @@
   <div id="debug-phase" class="dbg-phase">dist — · WASD / ▲◀▼▶</div>
   <div class="dbg-btns">
     <button type="button" id="dbg-warp-40" title="Teleport on map ~30 m from treasure">Far · 30 m</button>
-    <button type="button" id="dbg-warp-20" title="Teleport on map ~15 m (hot zone)">Hot · 15 m</button>
+    <button type="button" id="dbg-warp-20" title="Teleport on map ~20 m (hot zone)">Hot · 20 m</button>
     <button type="button" id="dbg-warp-10" title="Teleport on map ~8 m (place zone)">Place · 8 m</button>
     <button type="button" id="dbg-warp-5" title="Teleport on map ~5 m">Near · 5 m</button>
   </div>
@@ -1227,11 +1357,8 @@
 // never moves the player. `pickupRange` must be generous because phone GPS
 // typically jitters ±15–40 ft outdoors.
 const PRESETS = {
-  // Tighter outdoor hunt — treasures spawn just outside the AR unlock ring.
-  // 55 ft ≈ 16.8 m (> 15 m hot zone).
-  outdoor: { roomSize: 140, pixelScale: 14, pickupRange: 22, minRadius: 55 },
+  outdoor: { roomSize: 140, pixelScale: 14, pickupRange: 22, minRadius: 66 },
 
-  // Even smaller field for tight sites.
   compact: { roomSize: 100, pixelScale: 16, pickupRange: 20, minRadius: 50 },
 };
 
@@ -1241,8 +1368,22 @@ const ROOM_SIZE_FT = PRESET.roomSize;
 const PIXEL_SCALE  = PRESET.pixelScale;
 const PICKUP_RANGE = PRESET.pickupRange;
 const MIN_RADIUS   = PRESET.minRadius;
-const BOX_COUNT    = 3; // live + debug
+const BOX_COUNT    = 1;
 const TURN_STEP    = 15;
+
+// Weekly drop — update lat/lng, weekId, and socialPostUrl each campaign week.
+const WEEKLY_DROP = {
+  weekId: "2026-W35",
+  label: "Coffee Mix Weekly Hunt",
+  lat: 16.8661,
+  lng: 96.1951,
+  socialPostUrl: "https://www.facebook.com/",
+};
+
+const CAMPAIGN = {
+  brand: "Coffee Mix",
+  hashtag: "#CoffeeMixTreasure",
+};
 
 const GRID_FT = Math.max(1, Math.round(100 / PIXEL_SCALE));
 
@@ -1256,7 +1397,7 @@ const DIST_DISPLAY_SMOOTH = 0.35;    // blend when accepting a real distance cha
 
 // Metal detector + AR ranges (real-world meters)
 const M_PER_FT = 1 / FT_PER_M;
-const AR_RANGE_M = 15;            // hot zone + Open AR CTA
+const AR_RANGE_M = 20;
 const AR_RANGE_FT = AR_RANGE_M * FT_PER_M;
 const FLASH_RANGE_M = 6;
 const FLASH_RANGE_FT = FLASH_RANGE_M * FT_PER_M;
@@ -1267,14 +1408,13 @@ const AR_CATCH_AIM_DEG = 42;      // must roughly face chest to open
 const DETECTOR_MAX_FT = ROOM_SIZE_FT / 2;
 
 const urlParams = new URLSearchParams(location.search);
-const DEBUG_MOVE = urlParams.has("debug");
-// ?debug=1&near=1 — spawn crates ~8–18 m away for quick AR/detector testing while seated
+const TEST_MODE = urlParams.has("test");
+const DEBUG_MOVE = urlParams.has("debug") || TEST_MODE;
 const DEBUG_NEAR =
   DEBUG_MOVE &&
-  (urlParams.has("near") || urlParams.get("debug") === "near");
-// Optional: ?at=5 | ?at=15 — spawn treasure at exact meters ahead (debug)
+  (urlParams.has("near") || urlParams.get("debug") === "near" || TEST_MODE);
 const DEBUG_AT_M = DEBUG_MOVE ? Number(urlParams.get("at")) : NaN;
-const STORAGE_KEY = "treasure_radar_save";
+const STORAGE_KEY = "coffee_mix_hunt_save";
 
 /* =========================================================================
    State
@@ -1305,6 +1445,8 @@ const state = {
   chestScreenLocked: false, // once in place zone, pin chest on screen
   chestOpened: false,
   selfieDataUrl: null,
+  brandedCardDataUrl: null,
+  verificationCode: "",
   bgPaused: false,
 };
 
@@ -1414,6 +1556,18 @@ const dom = {
   claimPhone: el("claim-phone"),
   claimThumb: el("claim-thumb"),
   btnClaimShare: el("btn-claim-share"),
+  overlaySocial: el("overlay-social"),
+  socialCardPreview: el("social-card-preview"),
+  socialCodeDisplay: el("social-code-display"),
+  socialInstructions: el("social-instructions"),
+  btnSaveCard: el("btn-save-card"),
+  btnShareFb: el("btn-share-fb"),
+  btnShareIg: el("btn-share-ig"),
+  btnCommentPost: el("btn-comment-post"),
+  btnSocialDone: el("btn-social-done"),
+  resultCode: el("result-code"),
+  debugLinkUrl: el("debug-link-url"),
+  btnCopyDebug: el("btn-copy-debug"),
   debugPanel: el("debug-panel"),
   debugPhase: el("debug-phase"),
 };
@@ -1489,35 +1643,77 @@ function buzz(ms) {
    World setup
    ========================================================================= */
 
-function spawnBoxes() {
-  const center = ROOM_SIZE_FT / 2;
-  let minRadius = MIN_RADIUS;
-  let maxRadius = Math.max(minRadius + 1, ROOM_SIZE_FT / 2 - 5);
+function getActiveTreasure() {
+  return state.boxes.find((b) => !b.collected) || null;
+}
 
-  if (DEBUG_NEAR) {
-    minRadius = 8 * FT_PER_M;
-    maxRadius = 18 * FT_PER_M;
+function treasureDistanceM(box) {
+  if (!box) return Infinity;
+  if (!DEBUG_MOVE && gps.lastAccepted && box.lat != null && box.lng != null) {
+    return haversineMeters(
+      gps.lastAccepted.lat,
+      gps.lastAccepted.lng,
+      box.lat,
+      box.lng
+    );
   }
+  return ftToM(distanceTo(box));
+}
 
+function getTreasureDistanceM() {
+  return treasureDistanceM(getActiveTreasure());
+}
+
+function bearingToTreasureDeg(box) {
+  if (!box) return 0;
+  if (!DEBUG_MOVE && gps.lastAccepted && box.lat != null && box.lng != null) {
+    const lat1 = (gps.lastAccepted.lat * Math.PI) / 180;
+    const lat2 = (box.lat * Math.PI) / 180;
+    const dLng = ((box.lng - gps.lastAccepted.lng) * Math.PI) / 180;
+    const y = Math.sin(dLng) * Math.cos(lat2);
+    const x =
+      Math.cos(lat1) * Math.sin(lat2) -
+      Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+    return (Math.atan2(y, x) * 180) / Math.PI;
+  }
+  return Math.atan2(box.y - state.pos.y, box.x - state.pos.x) * (180 / Math.PI);
+}
+
+function initWeeklyTreasure() {
   state.boxes = [];
-  for (let i = 0; i < BOX_COUNT; i++) {
-    let angle = Math.random() * Math.PI * 2;
-    let radius = minRadius + Math.sqrt(Math.random()) * (maxRadius - minRadius);
+  const center = ROOM_SIZE_FT / 2;
 
-    // Debug: spawn around N meters ahead, spread so boxes don't stack.
+  if (DEBUG_MOVE) {
+    let minRadius = DEBUG_NEAR ? 8 * FT_PER_M : MIN_RADIUS;
+    let maxRadius = DEBUG_NEAR
+      ? 18 * FT_PER_M
+      : Math.max(minRadius + 1, ROOM_SIZE_FT / 2 - 5);
+    let angle = -Math.PI / 2;
+    let radius = minRadius + Math.sqrt(Math.random()) * (maxRadius - minRadius);
     if (Number.isFinite(DEBUG_AT_M) && DEBUG_AT_M > 0) {
-      const spread = (i - (BOX_COUNT - 1) / 2) * 0.55;
-      angle = -Math.PI / 2 + spread;
+      angle = -Math.PI / 2;
       radius = DEBUG_AT_M * FT_PER_M;
     }
-
     state.boxes.push({
-      id: i,
+      id: 0,
       x: center + radius * Math.cos(angle),
       y: center + radius * Math.sin(angle),
+      lat: null,
+      lng: null,
       collected: false,
     });
+    return;
   }
+
+  const pos = latLngToFeetOffset(WEEKLY_DROP.lat, WEEKLY_DROP.lng);
+  state.boxes.push({
+    id: 0,
+    x: pos ? pos.x : center,
+    y: pos ? pos.y : center + MIN_RADIUS,
+    lat: WEEKLY_DROP.lat,
+    lng: WEEKLY_DROP.lng,
+    collected: false,
+  });
 }
 
 function buildWorld() {
@@ -1589,17 +1785,12 @@ function updateNearest() {
     return;
   }
 
-  let target = active[0];
-  let best = Infinity;
-  for (const box of active) {
-    const d = distanceTo(box);
-    if (d < best) { best = d; target = box; }
-  }
-
+  const target = active[0];
+  const distM = treasureDistanceM(target);
   state.nearest = {
     id: target.id,
-    distance: best,
-    angle: Math.atan2(target.y - state.pos.y, target.x - state.pos.x) * (180 / Math.PI),
+    distance: distM * FT_PER_M,
+    angle: bearingToTreasureDeg(target),
   };
 }
 
@@ -1801,7 +1992,7 @@ function setupMediaSession() {
   if (!("mediaSession" in navigator)) return;
   try {
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: "Treasure Radar — Hunting",
+      title: `${CAMPAIGN.brand} — Weekly Hunt`,
       artist: "Proximity Detector",
       album: "Keep this playing while hunting",
     });
@@ -1981,7 +2172,7 @@ function startProximityDetector() {
   detector.running = true;
   detector.nextBeepTime = 0;
   detector.displayDistM = null;
-  detector.lastDistM = state.nearest.id === -1 ? Infinity : ftToM(state.nearest.distance);
+  detector.lastDistM = state.nearest.id === -1 ? Infinity : getTreasureDistanceM();
   setAlarmEnabled(detector.lastDistM <= PROX_ALERT_M);
 
   startWebAudioKeepAlive();
@@ -2088,20 +2279,8 @@ function updateProximityUI() {
     return;
   }
 
-  // Live: distance from last *stable* GPS fix (not every noisy sample).
-  let rawM = ftToM(state.nearest.distance);
-  const box = state.boxes.find((b) => b.id === state.nearest.id);
-  if (!DEBUG_MOVE && gps.origin && box && gps.lastAccepted) {
-    const target = feetOffsetToLatLng(box.x, box.y);
-    if (target) {
-      rawM = haversineMeters(
-        gps.lastAccepted.lat,
-        gps.lastAccepted.lng,
-        target.lat,
-        target.lng
-      );
-    }
-  }
+  // Live + debug: unified haversine (live) or map distance (debug).
+  const rawM = getTreasureDistanceM();
 
   const distM = stabilizeDistanceM(rawM);
   updateProximityFromDistanceM(distM);
@@ -2145,13 +2324,14 @@ function setPhase(phase) {
 function updateHotZoneCta() {
   if (!dom.btnOpenAr) return;
   const remaining = state.boxes.some((b) => !b.collected);
+  const distM = getTreasureDistanceM();
   const inHot =
     state.playing &&
     !state.finished &&
     remaining &&
-    state.inventory.length < BOX_COUNT &&
+    !state.chestOpened &&
     state.nearest.id !== -1 &&
-    ftToM(state.nearest.distance) <= AR_RANGE_M;
+    distM <= AR_RANGE_M;
   const show = inHot && !state.arUserOpened && state.phase !== "ar_scan";
   dom.btnOpenAr.classList.toggle("hidden", !show);
   if (dom.screenGame) dom.screenGame.classList.toggle("has-ar-cta", show);
@@ -2272,8 +2452,8 @@ function stopARCamera() {
 }
 
 async function openARCamera() {
-  if (!state.playing || state.finished || state.inventory.length >= BOX_COUNT) return;
-  if (state.nearest.id === -1 || ftToM(state.nearest.distance) > AR_RANGE_M) {
+  if (!state.playing || state.finished || state.chestOpened) return;
+  if (state.nearest.id === -1 || getTreasureDistanceM() > AR_RANGE_M) {
     flash(`Get within ${AR_RANGE_M} m first.`);
     return;
   }
@@ -2313,14 +2493,14 @@ async function openARCamera() {
 }
 
 function closeARToRadar() {
-  if (state.inventory.length >= BOX_COUNT && state.chestOpened) return;
+  if (state.chestOpened) return;
   state.arUserOpened = false;
   state.chestPlaced = false;
   state.chestScreenLocked = false;
-  pauseARView(); // keep stream for next Open AR
+  pauseARView();
   if (dom.btnVictorySelfie) dom.btnVictorySelfie.classList.add("hidden");
   resetChestVisual();
-  const distM = state.nearest.id === -1 ? Infinity : ftToM(state.nearest.distance);
+  const distM = getTreasureDistanceM();
   setPhase(distM <= AR_RANGE_M ? "hot" : "hunt");
   updateHotZoneCta();
 }
@@ -2343,7 +2523,7 @@ function resetChestVisual() {
 
 function shouldPlaceChest() {
   if (!state.arUserOpened || state.chestOpened || state.nearest.id === -1) return false;
-  return ftToM(state.nearest.distance) <= PLACE_RANGE_M;
+  return getTreasureDistanceM() <= PLACE_RANGE_M;
 }
 
 function arPerspectiveScale(distM) {
@@ -2419,7 +2599,7 @@ function showArWorldTarget(distM, relDeg, { opened = false, canCatch = false } =
 
 async function updateARView() {
   if (state.playing && !state.finished && !state.arUserOpened && !state.chestOpened) {
-    const distM = state.nearest.id === -1 ? Infinity : ftToM(state.nearest.distance);
+    const distM = getTreasureDistanceM();
     const next = distM <= AR_RANGE_M ? "hot" : "hunt";
     if (state.phase !== next && (state.phase === "hunt" || state.phase === "hot")) {
       setPhase(next);
@@ -2447,7 +2627,7 @@ async function updateARView() {
     bindArVideo(ar.stream);
   }
 
-  const distM = state.nearest.id === -1 ? Infinity : ftToM(state.nearest.distance);
+  const distM = getTreasureDistanceM();
   const relDeg = state.nearest.id === -1 ? 0 : relativeBearingDeg();
   const inPlace = shouldPlaceChest();
   const aimed = Math.abs(relDeg) <= AR_CATCH_AIM_DEG;
@@ -2485,9 +2665,9 @@ async function updateARView() {
 }
 
 function openTreasureChest() {
-  if (!state.arUserOpened || state.inventory.length >= BOX_COUNT) return;
+  if (!state.arUserOpened || state.chestOpened) return;
 
-  const distM = state.nearest.id === -1 ? Infinity : ftToM(state.nearest.distance);
+  const distM = getTreasureDistanceM();
   const relDeg = state.nearest.id === -1 ? 0 : relativeBearingDeg();
   const inPlace = shouldPlaceChest() || state.chestScreenLocked;
   const aimed = Math.abs(relDeg) <= AR_CATCH_AIM_DEG || distM <= 4;
@@ -2499,36 +2679,29 @@ function openTreasureChest() {
     return;
   }
 
-  const box = state.boxes.find((b) => b.id === state.nearest.id && !b.collected)
-    || state.boxes.find((b) => !b.collected);
+  const box = state.boxes.find((b) => !b.collected);
   if (!box) return;
 
   box.collected = true;
   state.inventory.push(box.id);
   state.points += 10;
   state.chestPlaced = true;
+  state.chestOpened = true;
   buzz([30, 40, 80, 40, 120]);
   burst(innerWidth / 2, innerHeight * 0.45, 50);
 
-  const left = BOX_COUNT - state.inventory.length;
-  if (left <= 0) {
-    state.chestOpened = true;
-    setPhase("chest_open");
-    flash(`All ${BOX_COUNT} treasures opened!`);
-    updateARView();
-    if (dom.btnVictorySelfie) dom.btnVictorySelfie.classList.remove("hidden");
-    if (dom.btnArCatch) dom.btnArCatch.classList.add("hidden");
-  } else {
-    flash(`Opened ${state.inventory.length}/${BOX_COUNT} — hunt the next on radar`);
-    state.arUserOpened = false;
-    state.chestPlaced = false;
-    state.chestScreenLocked = false;
-    state.chestOpened = false;
-    pauseARView(); // keep camera warm for next find
-    if (dom.btnVictorySelfie) dom.btnVictorySelfie.classList.add("hidden");
-    resetChestVisual();
-    setPhase("hunt");
-  }
+  setPhase("chest_open");
+  flash("Treasure opened! Take your victory selfie.");
+  updateARView();
+  if (dom.btnVictorySelfie) dom.btnVictorySelfie.classList.remove("hidden");
+  if (dom.btnArCatch) dom.btnArCatch.classList.add("hidden");
+
+  setTimeout(() => {
+    if (state.chestOpened && !state.finished && state.phase === "chest_open") {
+      startVictorySelfie();
+    }
+  }, 1000);
+
   render();
 }
 
@@ -2582,8 +2755,8 @@ function stopSelfieCamera() {
 }
 
 async function startVictorySelfie() {
-  if (state.inventory.length !== BOX_COUNT) {
-    flash(`Open all ${BOX_COUNT} treasures first (${state.inventory.length}/${BOX_COUNT}).`);
+  if (!state.chestOpened) {
+    flash("Open the weekly treasure first.");
     if (dom.btnVictorySelfie) dom.btnVictorySelfie.classList.add("hidden");
     return;
   }
@@ -2628,11 +2801,11 @@ function drawTreasureOnSelfieCanvas(ctx, w, h) {
   ctx.save();
   ctx.fillStyle = "rgba(0,0,0,0.5)";
   ctx.fillRect(0, h - Math.round(h * 0.11), w, Math.round(h * 0.11));
-  ctx.fillStyle = "#fbbf24";
+  ctx.fillStyle = "#d4a056";
   ctx.font = `bold ${Math.round(w * 0.055)}px system-ui, sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("I FOUND THE TREASURE", w / 2, h - Math.round(h * 0.055));
+  ctx.fillText(`${CAMPAIGN.brand.toUpperCase()} · TREASURE FOUND`, w / 2, h - Math.round(h * 0.055));
   ctx.restore();
 }
 
@@ -2724,6 +2897,139 @@ function openClaimForm() {
   dom.claimName.focus();
 }
 
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+function generateVerificationCode() {
+  const week = WEEKLY_DROP.weekId.replace(/[^a-zA-Z0-9]/g, "");
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let suffix = "";
+  for (let i = 0; i < 6; i++) {
+    suffix += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return `CMX-${week}-${suffix}`;
+}
+
+async function generateBrandedShareCard(name, selfieDataUrl, code, findTime) {
+  const W = 720;
+  const H = 1280;
+  const dpr = 2;
+  const canvas = document.createElement("canvas");
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  const c = canvas.getContext("2d");
+  c.scale(dpr, dpr);
+
+  const bg = c.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, "#2a1a0e");
+  bg.addColorStop(1, "#0c0704");
+  c.fillStyle = bg;
+  c.fillRect(0, 0, W, H);
+
+  c.fillStyle = "#6f4e37";
+  c.fillRect(0, 0, W, 100);
+  c.fillStyle = "#f5e6d3";
+  c.font = "900 28px system-ui, sans-serif";
+  c.textAlign = "center";
+  c.fillText(CAMPAIGN.brand.toUpperCase(), W / 2, 42);
+  c.font = "700 16px system-ui, sans-serif";
+  c.fillStyle = "#d4a056";
+  c.fillText(WEEKLY_DROP.label, W / 2, 72);
+
+  if (selfieDataUrl) {
+    try {
+      const img = await loadImage(selfieDataUrl);
+      const aspect = img.width / img.height;
+      let sw = W - 48;
+      let sh = sw / aspect;
+      if (sh > H * 0.52) {
+        sh = H * 0.52;
+        sw = sh * aspect;
+      }
+      const sx = (W - sw) / 2;
+      const sy = 118;
+      c.save();
+      c.beginPath();
+      if (c.roundRect) c.roundRect(sx, sy, sw, sh, 16);
+      else c.rect(sx, sy, sw, sh);
+      c.clip();
+      c.drawImage(img, sx, sy, sw, sh);
+      c.restore();
+    } catch { /* selfie optional */ }
+  }
+
+  c.fillStyle = "#ffffff";
+  c.font = "800 32px system-ui, sans-serif";
+  c.fillText(name, W / 2, H * 0.72);
+
+  c.fillStyle = "#a89078";
+  c.font = "700 14px system-ui, sans-serif";
+  c.fillText("VERIFICATION CODE", W / 2, H * 0.78);
+  c.fillStyle = "#d4a056";
+  c.font = "900 36px ui-monospace, monospace";
+  c.fillText(code, W / 2, H * 0.83);
+
+  c.fillStyle = "#a89078";
+  c.font = "600 14px system-ui, sans-serif";
+  c.fillText(`Found in ${findTime} · ${WEEKLY_DROP.weekId}`, W / 2, H * 0.88);
+  c.fillText(CAMPAIGN.hashtag, W / 2, H * 0.92);
+  c.font = "600 12px system-ui, sans-serif";
+  c.fillText("Post publicly + comment this code on the official post", W / 2, H * 0.965);
+
+  return canvas.toDataURL("image/jpeg", 0.92);
+}
+
+function getShareCommentText(code) {
+  return (
+    `${CAMPAIGN.hashtag} I found the ${CAMPAIGN.brand} weekly treasure! ` +
+    `Verification: ${code}. ${WEEKLY_DROP.label}`
+  );
+}
+
+function getFacebookShareUrl(text) {
+  const u = encodeURIComponent(location.href.split("?")[0]);
+  const q = encodeURIComponent(text);
+  return `https://www.facebook.com/sharer/sharer.php?u=${u}&quote=${q}`;
+}
+
+function saveBrandedCardImage() {
+  const src = state.brandedCardDataUrl || state.selfieDataUrl;
+  if (!src) {
+    flash("No share card yet");
+    return;
+  }
+  const link = document.createElement("a");
+  link.download = `${state.username || "coffee_mix"}_${state.verificationCode || "entry"}.jpg`;
+  link.href = src;
+  link.click();
+  flash("Image saved");
+}
+
+function openSocialOverlay() {
+  if (!dom.overlaySocial) {
+    finish(false);
+    return;
+  }
+  if (dom.socialCardPreview && state.brandedCardDataUrl) {
+    dom.socialCardPreview.src = state.brandedCardDataUrl;
+  }
+  if (dom.socialCodeDisplay) {
+    dom.socialCodeDisplay.textContent = state.verificationCode || "";
+  }
+  if (dom.socialInstructions) {
+    dom.socialInstructions.textContent =
+      "1. Save the card · 2. Post it publicly on Facebook or Instagram · " +
+      "3. Comment your verification code on the official weekly post to finalize entry.";
+  }
+  dom.overlaySocial.classList.remove("hidden");
+}
+
 async function shareToClaim() {
   const name = dom.claimName.value.trim();
   const phone = dom.claimPhone.value.trim();
@@ -2740,54 +3046,59 @@ async function shareToClaim() {
 
   state.username = name;
   state.phone = phone;
+  state.verificationCode = generateVerificationCode();
+  const findTime = formatTime(state.elapsed);
+
+  state.brandedCardDataUrl = await generateBrandedShareCard(
+    name,
+    state.selfieDataUrl,
+    state.verificationCode,
+    findTime
+  );
 
   const payload = {
     name,
     phone,
-    time: formatTime(state.elapsed),
+    verificationCode: state.verificationCode,
+    weekId: WEEKLY_DROP.weekId,
+    time: findTime,
     points: state.points,
     walkedFt: Math.round(state.walkedFt),
     claimedAt: new Date().toISOString(),
+    hasSelfie: !!state.selfieDataUrl,
+    hasBrandedCard: !!state.brandedCardDataUrl,
   };
 
   try {
-    localStorage.setItem(
-      STORAGE_KEY + "_claim",
-      JSON.stringify({ ...payload, hasSelfie: !!state.selfieDataUrl })
-    );
+    localStorage.setItem(STORAGE_KEY + "_claim", JSON.stringify(payload));
   } catch { /* ignore */ }
 
-  const shareText =
-    `I claimed the Treasure Radar win!\n` +
-    `Name: ${name}\nPhone: ${phone}\nTime: ${payload.time} · ${payload.points} pts`;
+  const shareText = getShareCommentText(state.verificationCode);
 
   try {
-    if (navigator.share) {
-      const data = { title: "Treasure Radar Claim", text: shareText };
-      if (state.selfieDataUrl && navigator.canShare) {
-        try {
-          const blob = await (await fetch(state.selfieDataUrl)).blob();
-          const file = new File([blob], "victory-selfie.jpg", { type: "image/jpeg" });
-          if (navigator.canShare({ files: [file] })) {
-            data.files = [file];
-          }
-        } catch { /* text-only share */ }
+    if (navigator.share && state.brandedCardDataUrl) {
+      const blob = await (await fetch(state.brandedCardDataUrl)).blob();
+      const file = new File([blob], "coffee-mix-entry.jpg", { type: "image/jpeg" });
+      const data = {
+        title: `${CAMPAIGN.brand} Weekly Hunt`,
+        text: shareText,
+      };
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        data.files = [file];
       }
       await navigator.share(data);
     } else if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(shareText);
-      flash("Claim copied to clipboard");
+      flash("Entry text copied — save card and post");
     }
   } catch (err) {
-    if (err && err.name === "AbortError") {
-      /* user cancelled share — still complete claim */
-    } else {
-      flash("Shared locally — claim saved");
+    if (!err || err.name !== "AbortError") {
+      flash("Save your card below, then post to social");
     }
   }
 
   dom.overlayClaim.classList.add("hidden");
-  finish(false);
+  openSocialOverlay();
 }
 
 /* =========================================================================
@@ -3136,6 +3447,10 @@ async function play() {
     setGpsStatus(`GPS · locked ±${Math.round(accuracyFt)} ft`);
   }
 
+  initWeeklyTreasure();
+  buildWorld();
+  render();
+
   dom.screenStart.classList.add("hidden");
   dom.screenGame.classList.remove("hidden");
   dom.controls.classList.toggle("hidden", !DEBUG_MOVE);
@@ -3165,6 +3480,8 @@ function resetRun() {
   state.chestScreenLocked = false;
   state.chestOpened = false;
   state.selfieDataUrl = null;
+  state.brandedCardDataUrl = null;
+  state.verificationCode = "";
   state.username = "";
   state.phone = "";
   state.bgPaused = false;
@@ -3185,13 +3502,12 @@ function resetRun() {
 
   if (dom.overlaySelfie) dom.overlaySelfie.classList.add("hidden");
   if (dom.overlayClaim) dom.overlayClaim.classList.add("hidden");
+  if (dom.overlaySocial) dom.overlaySocial.classList.add("hidden");
   if (dom.btnVictorySelfie) dom.btnVictorySelfie.classList.add("hidden");
   if (dom.btnOpenAr) dom.btnOpenAr.classList.add("hidden");
   resetChestVisual();
 
-  spawnBoxes();
-  buildWorld();
-  render();
+  state.boxes = [];
   dom.statTime.textContent = "0:00";
   dom.message.textContent = "";
   setGpsStatus(DEBUG_MOVE ? "DEBUG MOVE" : "GPS · waiting");
@@ -3225,8 +3541,8 @@ function showCountdownFrame(text) {
   dom.countdownText = fresh;
   dom.countdownSub.textContent =
     text === "GO! 🏃"
-      ? (DEBUG_MOVE ? "Sandbox — use D-pad + debug panel" : "Walk outdoors — GPS tracks you")
-      : "Locking GPS origin";
+      ? (DEBUG_MOVE ? "Sandbox — use D-pad to walk toward treasure" : "Walk outdoors — GPS tracks you")
+      : `Locating ${CAMPAIGN.brand} weekly drop`;
 }
 
 function beginPlay() {
@@ -3238,7 +3554,7 @@ function beginPlay() {
     toggleCompass(true);
   }
   startProximityDetector();
-  if (state.nearest.id !== -1 && ftToM(state.nearest.distance) <= PROX_ALERT_M) {
+  if (state.nearest.id !== -1 && getTreasureDistanceM() <= PROX_ALERT_M) {
     playDetectorBeep(0.35);
     setPhase("hot");
   } else {
@@ -3265,13 +3581,22 @@ function finish(quit) {
   if (dom.btnOpenAr) dom.btnOpenAr.classList.add("hidden");
   if (dom.overlaySelfie) dom.overlaySelfie.classList.add("hidden");
   if (dom.overlayClaim) dom.overlayClaim.classList.add("hidden");
+  if (dom.overlaySocial) dom.overlaySocial.classList.add("hidden");
   recordRun();
 
   dom.resultTitle.textContent = quit ? "MISSION ABORTED" : "MISSION COMPLETE";
   dom.resultName.textContent = state.username || "Hunter";
   dom.resultBoxes.innerHTML = state.inventory.length
-    ? state.inventory.map(() => "📦").join("")
+    ? "☕ 📦"
     : `<span style="font-size:13px;color:#52525b">No treasure claimed</span>`;
+  if (dom.resultCode) {
+    if (state.verificationCode && !quit) {
+      dom.resultCode.textContent = `Code: ${state.verificationCode}`;
+      dom.resultCode.classList.remove("hidden");
+    } else {
+      dom.resultCode.classList.add("hidden");
+    }
+  }
   dom.resultTime.textContent = formatTime(state.elapsed);
   dom.resultWalked.textContent = `${Math.round(state.walkedFt)} ft`;
   dom.resultPoints.textContent = state.points;
@@ -3554,18 +3879,25 @@ function fireworks() {
    ========================================================================= */
 
 function saveResultImage() {
-  const W = 720, H = 900, dpr = 2;
+  if (state.brandedCardDataUrl) {
+    saveBrandedCardImage();
+    return;
+  }
+
+  const W = 720;
+  const H = 900;
+  const dpr = 2;
   const canvas = document.createElement("canvas");
   canvas.width = W * dpr;
   canvas.height = H * dpr;
   const c = canvas.getContext("2d");
   c.scale(dpr, dpr);
 
-  c.fillStyle = "#09090b";
+  c.fillStyle = "#0c0704";
   c.fillRect(0, 0, W, H);
 
-  c.fillStyle = "#18181b";
-  c.strokeStyle = "rgba(255,255,255,0.12)";
+  c.fillStyle = "#1a120c";
+  c.strokeStyle = "rgba(212, 160, 86, 0.25)";
   c.lineWidth = 2;
   c.beginPath();
   if (c.roundRect) c.roundRect(48, 48, W - 96, H - 96, 36);
@@ -3574,44 +3906,47 @@ function saveResultImage() {
   c.stroke();
 
   c.textAlign = "center";
+  c.fillStyle = "#f5e6d3";
+  c.font = "900 40px system-ui, sans-serif";
+  c.fillText(dom.resultTitle.textContent, W / 2, 170);
 
-  c.fillStyle = "#ffffff";
-  c.font = "900 44px system-ui, sans-serif";
-  c.fillText(dom.resultTitle.textContent, W / 2, 190);
-
-  c.fillStyle = "#fbbf24";
-  c.font = "700 30px system-ui, sans-serif";
-  c.fillText(state.username, W / 2, 250);
+  c.fillStyle = "#d4a056";
+  c.font = "700 28px system-ui, sans-serif";
+  c.fillText(state.username, W / 2, 230);
 
   c.font = "64px system-ui, sans-serif";
-  const crates = state.inventory.map(() => "📦").join(" ") || "—";
-  c.fillText(crates, W / 2, 400);
+  c.fillText("☕ 📦", W / 2, 380);
 
-  c.fillStyle = "#71717a";
-  c.font = "700 18px system-ui, sans-serif";
-  c.fillText(`${state.inventory.length} of ${BOX_COUNT} crates recovered`, W / 2, 470);
+  if (state.verificationCode) {
+    c.fillStyle = "#a89078";
+    c.font = "700 16px system-ui, sans-serif";
+    c.fillText("VERIFICATION CODE", W / 2, 450);
+    c.fillStyle = "#d4a056";
+    c.font = "800 32px ui-monospace, monospace";
+    c.fillText(state.verificationCode, W / 2, 495);
+  }
 
   const stats = [
     ["TIME", formatTime(state.elapsed)],
     ["WALKED", `${Math.round(state.walkedFt)} ft`],
-    ["POINTS", String(state.points)],
+    ["WEEK", WEEKLY_DROP.weekId],
   ];
   stats.forEach(([label, value], i) => {
     const x = W / 2 + (i - 1) * 190;
-    c.fillStyle = "#71717a";
+    c.fillStyle = "#a89078";
     c.font = "700 16px system-ui, sans-serif";
-    c.fillText(label, x, 600);
-    c.fillStyle = "#ffffff";
-    c.font = "800 38px ui-monospace, monospace";
-    c.fillText(value, x, 648);
+    c.fillText(label, x, 620);
+    c.fillStyle = "#f5e6d3";
+    c.font = "800 34px ui-monospace, monospace";
+    c.fillText(value, x, 668);
   });
 
-  c.fillStyle = "#3f3f46";
+  c.fillStyle = "#6f4e37";
   c.font = "600 18px system-ui, sans-serif";
-  c.fillText("TREASURE RADAR", W / 2, H - 110);
+  c.fillText(CAMPAIGN.brand.toUpperCase(), W / 2, H - 110);
 
   const link = document.createElement("a");
-  link.download = `${state.username || "player"}_result.png`;
+  link.download = `${state.username || "coffee_mix"}_result.png`;
   link.href = canvas.toDataURL("image/png");
   link.click();
 }
@@ -3668,24 +4003,79 @@ dom.btnSelfieRetake.addEventListener("click", retakeSelfie);
 dom.btnSelfieUse.addEventListener("click", useSelfieAndClaim);
 dom.btnClaimShare.addEventListener("click", shareToClaim);
 
+if (dom.btnSaveCard) {
+  dom.btnSaveCard.addEventListener("click", saveBrandedCardImage);
+}
+if (dom.btnShareFb) {
+  dom.btnShareFb.addEventListener("click", () => {
+    const text = getShareCommentText(state.verificationCode);
+    window.open(getFacebookShareUrl(text), "_blank", "noopener,noreferrer");
+  });
+}
+if (dom.btnShareIg) {
+  dom.btnShareIg.addEventListener("click", () => {
+    saveBrandedCardImage();
+    const text = getShareCommentText(state.verificationCode);
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).catch(() => {});
+    }
+    flash("Card saved — open Instagram, post the image, paste caption");
+  });
+}
+if (dom.btnCommentPost) {
+  dom.btnCommentPost.addEventListener("click", () => {
+    const text = getShareCommentText(state.verificationCode);
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).catch(() => {});
+    }
+    window.open(WEEKLY_DROP.socialPostUrl, "_blank", "noopener,noreferrer");
+    flash("Comment text copied — paste on official post");
+  });
+}
+if (dom.btnSocialDone) {
+  dom.btnSocialDone.addEventListener("click", () => {
+    if (dom.overlaySocial) dom.overlaySocial.classList.add("hidden");
+    finish(false);
+  });
+}
+
 // Debug mode: WASD / D-pad only — Warp / Debug QA card stays hidden.
 if (dom.debugPanel) dom.debugPanel.classList.add("hidden");
 
 window.addEventListener("keydown", onKeyDown);
 window.addEventListener("resize", resizeFx);
 
-const maxSpawnRadius = Math.max(MIN_RADIUS + 1, ROOM_SIZE_FT / 2 - 5);
-const spaceNeeded = Math.ceil((maxSpawnRadius * 2) / 10) * 10;
-el("tagline").innerHTML =
-  `${BOX_COUNT} hidden treasures — radar distance + minimap only.<br />` +
-  `≤${AR_RANGE_M}&nbsp;m → <b>Open AR Camera</b> · open at ≤${PLACE_RANGE_M}&nbsp;m → selfie → claim.<br />` +
-  `<span style="color:#64748b">Needs roughly ${spaceNeeded} ft of open outdoor space.</span>`;
+const testLinkBase = `${location.origin}${location.pathname}?test=1`;
+const testLinkAt = `${testLinkBase}&at=15`;
+if (dom.debugLinkUrl) {
+  dom.debugLinkUrl.textContent = TEST_MODE || DEBUG_MOVE
+    ? `${location.href} (active)`
+    : `${testLinkBase}\n${testLinkAt}`;
+}
+if (dom.btnCopyDebug) {
+  dom.btnCopyDebug.addEventListener("click", async () => {
+    const url = TEST_MODE || DEBUG_MOVE ? location.href : testLinkBase;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        flash("Test link copied");
+      }
+    } catch {
+      flash("Copy failed — select link manually");
+    }
+  });
+}
 
-if (DEBUG_MOVE) {
+el("tagline").innerHTML =
+  `${WEEKLY_DROP.label}<br />` +
+  `Walk toward the weekly drop · detector beeps within <b>${AR_RANGE_M} m</b>.<br />` +
+  `Open AR → find chest → selfie → share to claim.`;
+
+if (DEBUG_MOVE || TEST_MODE) {
   el("tagline").innerHTML +=
-    `<br /><span style="color:#fbbf24">Sandbox: no GPS — walk with WASD / arrows or D-pad.` +
-    `${DEBUG_NEAR ? " near=1 (~8–18 m spawn)." : ""}` +
-    `${Number.isFinite(DEBUG_AT_M) ? ` at=${DEBUG_AT_M}m.` : ""}</span>`;
+    `<br /><span style="color:var(--gold)">Sandbox active` +
+    `${DEBUG_NEAR ? " · treasure ~8–18 m ahead" : ""}` +
+    `${Number.isFinite(DEBUG_AT_M) ? ` · at=${DEBUG_AT_M}m` : ""}</span>`;
 }
 
 const secureWarn = el("secure-warn");
@@ -3696,7 +4086,7 @@ if (isLocalFileUrl()) {
       `<strong>Opened as a file — GPS will not work.</strong><br />` +
       `Address shows <code>${location.protocol}//…</code> (local file). ` +
       `Upload to your server and open <code>https://your-domain/…</code> instead.` +
-      ` Or use <code>?debug=1&amp;near=1</code> to test seated.`;
+      ` Or use <code>?test=1</code> to test seated.`;
   } else {
     secureWarn.innerHTML =
       `<strong>GPS will not work on this URL.</strong><br />` +

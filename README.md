@@ -1,30 +1,47 @@
-# Treasure Radar
+# Coffee Mix Weekly AR Hunt
 
-A prototype outdoor AR treasure hunt in a single `index.html` (no build step).
+City-wide weekly AR treasure hunt prototype in a single `index.html` (no build step, no backend).
 
-**Live flow**
+**Campaign flow (Steps 2–5 in product; Step 1 social entry skipped in app)**
 
-1. Real-time distance on radar + metal-detector audio (nearest of **3** treasures)  
-2. Crates are **hidden on the map** — only dots on the **minimap** + distance/bearing  
-3. At **≤ 15 m** — detector + **Open AR Camera**  
-4. **Pokemon GO-style AR:** pan to find the chest; **OPEN CHEST** when ≤8 m and aimed  
-5. Repeat for all **3** → **Victory Selfie** (you + box)  
-6. Form: **Name** + **Phone** → **Share to Claim**
+1. **PLAY** unlocks GPS + metal-detector audio (live) or sandbox movement (debug)
+2. Real-time distance to the **weekly drop coordinates** + detector beeps
+3. At **≤ 20 m** — tap **Open AR Camera**, pan to find the chest at the drop site
+4. At **≤ 8 m** + aim — **OPEN CHEST** → **Victory Selfie** → Name + Phone
+5. Branded share card + **verification code** → post on Facebook/Instagram + comment on official weekly post
 
-Outdoor field ≈ **140 ft** (~43 m); treasures spawn from ~**55 ft** (~17 m). Camera streams stay warm when returning to radar.
+**Prizes (campaign copy):** fastest finder wins the weekly grand prize; next 50 finders get coffee gift sets.
 
-**Movement is GPS-only** in real play. Shake does nothing. Compass only sets facing.
+Claims are **client-only** in this prototype (localStorage). Ops match verification codes from public posts manually until a backend is added.
+
+---
+
+## Weekly ops
+
+Edit the config block at the top of [`index.html`](index.html):
+
+```js
+const WEEKLY_DROP = {
+  weekId: "2026-W35",
+  label: "Coffee Mix Weekly Hunt",
+  lat: 16.8661,   // drop latitude — update each week
+  lng: 96.1951,   // drop longitude
+  socialPostUrl: "https://www.facebook.com/...", // official post to comment on
+};
+```
+
+Deploy to HTTPS, QA with `?test=1`, then field-test at the drop site.
 
 ---
 
 ## Running it
 
-**Do not** open the HTML as a local file on a phone — GPS/camera need a secure context (`https://` or `localhost`).
+**Do not** open the HTML as a local file on a phone. GPS and camera need a secure context (`https://` or `localhost`).
 
-**Recommended (permanent):** host `index.html` on GitHub Pages, Netlify, Vercel, or any static HTTPS host — e.g. `https://nangmya.github.io/optic/`. Push updates there; no tunnel required day to day.
+**Recommended:** GitHub Pages, Netlify, Vercel, or any static HTTPS host.
 
-- **Phone (real play):** open your HTTPS site → allow Location → walk outdoors.  
-- **Sandbox (seated):** `?debug=1&near=1` on that same HTTPS URL (or localhost) — D-pad / WASD, no GPS walk.
+- **Phone (real play):** open your HTTPS URL → **START HUNT** → allow Location → walk to weekly coordinates
+- **Sandbox (seated QA):** append `?test=1` (same as `?debug=1&near=1`)
 
 ### Local PC only
 
@@ -32,41 +49,28 @@ Outdoor field ≈ **140 ft** (~43 m); treasures spawn from ~**55 ft** (~17 m). C
 python -m http.server 8123
 ```
 
-Then open `http://localhost:8123/?debug=1&near=1` on the same machine. Do **not** rely on a Cloudflare tunnel as your normal workflow.
+Then open `http://localhost:8123/?test=1`
 
 ---
 
-## Sandbox / debug mode
+## Debug / test links
 
-No real GPS. Move on the radar with **WASD / arrow keys** (PC) or the on-screen **▲◀▼▶** pad. Walk to each of the **3** treasures yourself.
+The start screen shows a copyable QA link. Aliases:
 
-```
-https://your-site/index.html?debug=1&near=1
-```
-
-| Flag | What it does |
+| URL | What it does |
 | --- | --- |
-| `?debug=1` | No GPS — keyboard / D-pad movement |
-| `&near=1` | Treasures spawn **~8–18 m** away |
-| `&at=15` | Spawn treasures around **N meters** ahead |
+| `?test=1` | Sandbox: no GPS, treasure ~8–18 m ahead, D-pad / WASD |
+| `?test=1&at=15` | Spawn treasure exactly **15 m** ahead |
+| `?debug=1&near=1` | Same as `?test=1` |
 
-**Seated test:** PLAY → walk with pad toward the yellow arc → ≤15 m detector + **Open AR Camera** → ≤8 m open chest → repeat for all **3** → **Take Victory Selfie** → claim.
+Example:
 
----
+```
+https://your-site/index.html?test=1
+https://your-site/index.html?test=1&at=15
+```
 
-## Testing on a phone (real GPS)
-
-1. Deploy / push to your HTTPS host (GitHub Pages, etc.).  
-2. On the phone, open that `https://…` URL (not `file://`, not a tunnel URL).  
-3. Tap **PLAY** → allow Location → walk until ≤15 m → Open AR → ≤8 m open chest → selfie → claim.
-
-### If you see “Location permission denied”
-
-1. URL must be `https://` (or `localhost` on the same device)  
-2. Browser site settings → Location → Allow  
-3. Phone Location ON for the browser  
-4. Host must not send `Permissions-Policy: geolocation=()`  
-5. Layout-only: `?debug=1` (no GPS)
+**Seated test:** START HUNT → walk with pad toward bearing arc → ≤20 m detector + **Open AR Camera** → ≤8 m open chest → selfie → claim → social overlay.
 
 ---
 
@@ -74,17 +78,12 @@ https://your-site/index.html?debug=1&near=1
 
 | Zone | Distance | Behavior |
 | --- | --- | --- |
-| Cold | > 15 m | Distance HUD; detector quiet |
-| Hot | ≤ 15 m | Faster / higher beeps + **Open AR Camera** |
-| Place | ≤ 8 m (while AR open) | Aim + **OPEN CHEST** |
-| Flash | ≤ 6 m | Corner strobes + vibrate (when screen on) |
-| Flash | ≤ 8 m | Corner strobes + vibrate (when screen on) |
+| Cold | > 20 m | Distance HUD; detector quiet |
+| Hot | ≤ 20 m | Faster / higher beeps + **Open AR Camera** |
+| Place | ≤ 8 m (AR open) | Aim + **OPEN CHEST** |
+| Flash | ≤ 6 m | Corner strobes + vibrate (screen on) |
 
-AR does **not** auto-open; the player must tap **Open AR Camera**. **← RADAR** exits AR (chest re-places when you open AR again in range).
-
-### Background / screen off
-
-Detector keep-alive: Web Audio + HTML5 loop + Media Session + optional Wake Lock. Beeps schedule on the AudioContext clock. GPS may still update while media plays (device-dependent).
+AR does **not** auto-open; tap **Open AR Camera** in the hot zone. **← RADAR** exits AR (stream stays warm).
 
 ---
 
@@ -93,34 +92,27 @@ Detector keep-alive: Web Audio + HTML5 loop + Media Session + optional Wake Lock
 | Input | Action |
 | --- | --- |
 | Walking (GPS) | Moves you on the radar 1:1 |
-| Compass | Facing only |
-| **Open AR Camera** | Manual AR entry at ≤15 m |
-| Tap AR chest | Open treasure (in place zone) |
-| Victory Selfie / Claim | End loop |
-| `?debug=1` pad / WASD | Seated movement |
+| Compass | Facing for AR aim |
+| **Open AR Camera** | Manual AR at ≤20 m |
+| Tap AR chest / OPEN CHEST | Open weekly treasure |
+| **Share to Claim** | Branded card + verification code |
+| `?test=1` pad / WASD | Seated sandbox movement |
 
-D-pad is **hidden** unless `?debug=1` (anti-cheat).
-
----
-
-## Anti-cheat notes
-
-- No accelerometer movement  
-- Real play: position only from `watchPosition`  
-- Accuracy worse than ±50 ft ignored; hops under 3 ft ignored  
-- Start GPS fix = field center; treasure is a virtual offset (debug can warp it)
+D-pad is **hidden** unless debug/test mode.
 
 ---
 
 ## Saved data
 
-`localStorage`:
+`localStorage` key prefix `coffee_mix_hunt_save`:
 
-- `treasure_radar_save` — best time, points, runs  
-- `treasure_radar_save_claim` — last Name / Phone claim payload  
+- `coffee_mix_hunt_save` — best time, runs
+- `coffee_mix_hunt_save_claim` — last claim with `verificationCode`, `weekId`, name, phone
 
 ---
 
-## Notes
+## Phase 2 (not in this build)
 
-Earlier Next.js + Prisma + pedometer version was removed. This file is the full prototype.
+- Server-side claim validation and fastest-finder leaderboard
+- True WebXR / 3D chest model (current AR uses rear camera + compass world-aim)
+- Step 1 social microsite landing (skipped; app starts at PLAY)
